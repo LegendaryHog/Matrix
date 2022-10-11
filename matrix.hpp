@@ -23,13 +23,13 @@ class matrix_t
         T& operator[] (int ind) {return row[ind];}
         const T& operator[] (int ind) const {return row[ind];}
 
-        T& at(int ind)
+        T& at(int ind) &
         {
             if (ind >= len)
                 throw std::out_of_range{"request access to elem out of row"};
             return row[ind];
         }
-        const T& at (int ind) const
+        const T& at (int ind) const&
         {
             if (ind >= len)
                 throw std::out_of_range{"request access to elem out of row"};
@@ -93,7 +93,7 @@ class matrix_t
         }
     }
 
-    matrix_t(matrix_t& rhs)
+    matrix_t(const matrix_t& rhs)
     :height {rhs.height}, width {rhs.width}, data {new T*[height]{new T[width] {}}}
     {
         for (auto i = 0; i < height; i++)
@@ -105,7 +105,7 @@ class matrix_t
     :height {rhs.height}, width {rhs.width}, data {rhs.data}
     {}
 
-    matrix_t operator= (matrix_t& rhs) &
+    matrix_t& operator=(const matrix_t& rhs)
     {
         height = rhs.height;
         width  = rhs.width;
@@ -117,11 +117,14 @@ class matrix_t
         return *this;
     }
 
-    matrix_t operator= (matrix_t&& rhs)
+    matrix_t& operator=(matrix_t&& rhs)
     {
+        if (this == &rhs)
+            return *this;
+
         height = rhs.height;
         width  = rhs.width;
-        std::swap(data, rhs.data);
+        data   = rhs.data;
         return *this;
     }
 
@@ -132,16 +135,44 @@ class matrix_t
         delete[] data;
     }
 
+    static matrix_t quad(int sz, T val = T{})
+    {
+        return matrix_t{sz, sz, val};
+    }
+
+    template<std::input_iterator it>
+    static matrix_t quad(int sz, it begin, it end)
+    {
+        return matrix_t{sz, sz, begin, end};
+    }
+
+    template<std::input_iterator it>
+    static matrix_t diag(it begin, it end)
+    {
+        auto sz = 0;
+        for (auto itr = begin; itr != end; ++itr, sz++) {;}
+        return diag(sz, begin, end);
+    }
+
+    template<std::input_iterator it>
+    static matrix_t diag(int sz, it begin, it end)
+    {
+        matrix_t result {quad(sz)};
+        for (auto i = 0, itr = begin; i < sz && itr != end; ++itr, i++)
+            result.data[i][i] = *itr;
+        return result;
+    }
+
     proxy_row operator[] (int ind) {return proxy_row{width, data[ind]};}
     const proxy_row operator[] (int ind) const {return proxy_row{width, data[ind]};}
 
-    proxy_row at(int ind)
+    proxy_row at(int ind) &
     {
         if (ind >= height)
                 throw std::out_of_range{"request access to row out of matrix"};
         return proxy_row{width, data[ind]};
     }
-    const proxy_row at(int ind) const
+    const proxy_row at(int ind) const&
     {
         if (ind >= height)
                 throw std::out_of_range{"request access to row out of matrix"};
