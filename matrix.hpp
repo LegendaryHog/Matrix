@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <iostream>
+#include <ostream>
 #include <iterator>
 #include <stdexcept>
 
@@ -23,13 +24,13 @@ class matrix_t
         T& operator[] (int ind) {return row[ind];}
         const T& operator[] (int ind) const {return row[ind];}
 
-        T& at(int ind) &
+        T& at(int ind)
         {
             if (ind >= len)
                 throw std::out_of_range{"request access to elem out of row"};
             return row[ind];
         }
-        const T& at (int ind) const&
+        const T& at (int ind) const
         {
             if (ind >= len)
                 throw std::out_of_range{"request access to elem out of row"};
@@ -147,6 +148,15 @@ class matrix_t
     }
 
     template<std::input_iterator it>
+    static matrix_t diag(int sz, it begin, it end)
+    {
+        matrix_t result {quad(sz)};
+        for (auto i = 0, itr = begin; i < sz && itr != end; ++itr, i++)
+            result.data[i][i] = *itr;
+        return result;
+    }
+
+    template<std::input_iterator it>
     static matrix_t diag(it begin, it end)
     {
         auto sz = 0;
@@ -154,12 +164,11 @@ class matrix_t
         return diag(sz, begin, end);
     }
 
-    template<std::input_iterator it>
-    static matrix_t diag(int sz, it begin, it end)
+    static matrix_t diag(int sz, T val = T{})
     {
         matrix_t result {quad(sz)};
-        for (auto i = 0, itr = begin; i < sz && itr != end; ++itr, i++)
-            result.data[i][i] = *itr;
+        for (auto i = 0; i < sz; i++)
+            result.data[i][i] = val;
         return result;
     }
 
@@ -177,6 +186,24 @@ class matrix_t
         if (ind >= height)
                 throw std::out_of_range{"request access to row out of matrix"};
         return proxy_row{width, data[ind]};
+    }
+
+    std::ostream& dump(std::ostream& out) const 
+    {
+        out << '{';
+        for (auto i = 0; i < height; i++)
+        {
+            out << '{';
+            if (width != 0)
+            {
+                for (auto j = 0; j < width - 1; j++)
+                    out << data[i][j] << ' ';
+                out << data[i][width - 1];
+            }
+            out << '}';
+        }
+        out << '}';
+        return out;
     }    
 };
 
