@@ -58,7 +58,7 @@ class matrix_t
         
         for (auto i = 0, itr = begin; i < height; i++)
             for (auto j = 0; itr != end && j < width; j++, ++itr)
-                data[i][j] = *itr++;    
+                data[i][j] = *itr;    
     }
 
     matrix_t(T val = T{}): height {1}, width {1}, data {new T*[height] {new T[width] {val}}} {}
@@ -206,5 +206,11 @@ class matrix_t
         return out;
     }    
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const matrix_t<T>& mat)
+{
+    return mat.dump(out);
+}
 
 } //namespace
