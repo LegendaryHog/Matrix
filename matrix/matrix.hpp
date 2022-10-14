@@ -10,11 +10,11 @@ namespace matrix{
 template<typename T>
 class matrix_t
 {
-    int height = 0, width = 0;
-    T* data = nullptr;
+    int height = 1, width = 1;
+    T* data = new T[1]{T{}};
 
-    int* row_order = nullptr;
-    int* col_order = nullptr;
+    int* row_order = new int[1]{0};
+    int* col_order = new int[1]{0};
 
     void init_orders()
     {
@@ -172,9 +172,33 @@ class matrix_t
         return result;
     }
 
+    T& at(int row_ind, int col_ind) & noexcept
+    {
+        return data[row_order[row_ind] * width + col_order[col_ind]];
+    }
+
+    const T& at(int row_ind, int col_ind) const & noexcept
+    {
+        return data[row_order[row_ind] * width + col_order[col_ind]];
+    }
+
+    T at(int row_ind, int col_ind) && noexcept
+    {
+        return data[row_order[row_ind] * width + col_order[col_ind]];
+    }
+
     std::ostream& dump(std::ostream& out) const 
     {
-        
+        out << '{';
+        for (auto i = 0; i < height; i++)
+        {
+            out << '{';
+            for (auto j = 0; j < width - 1; j++)
+                out << at(i, j) << ' ';
+            out << at(i, width - 1) << '}';
+            
+        }
+        out << '}';
         return out;
     }    
 };
