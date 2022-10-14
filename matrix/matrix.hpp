@@ -105,11 +105,13 @@ class matrix_t
     {
         height = rhs.height;
         width  = rhs.width;
-        data = new T*[height]{new T[width] {}};
+        data = new T[height * width];
+        row_order = new int[height];
+        col_order = new int[width];
 
-        for (auto i = 0; i < height; i++)
-            for (auto j = 0; j < width; j++)
-                rhs.data[i][j] = data[i][j];
+        std::copy(rhs.data, rhs.data + height * width, data);
+        std::copy(rhs.row_order, rhs.row_order + height, row_order);
+        std::copy(rhs.col_order, rhs.col_order + width, col_order);
         return *this;
     }
 
@@ -121,14 +123,17 @@ class matrix_t
         height = rhs.height;
         width  = rhs.width;
         data   = rhs.data;
+        row_order = rhs.row_order;
+        col_order = rhs.col_order;
+
         return *this;
     }
 
     ~matrix_t()
     {
-        for (auto i = 0; i < height; i++)
-            delete[] data[i];
         delete[] data;
+        delete[] row_order;
+        delete[] col_order;
     }
 
     static matrix_t quad(int sz, T val = T{})
@@ -147,7 +152,7 @@ class matrix_t
     {
         matrix_t result {quad(sz)};
         for (auto i = 0, itr = begin; i < sz && itr != end; ++itr, i++)
-            result.data[i][i] = *itr;
+            result.data[i * sz + i] = *itr;
         return result;
     }
 
@@ -163,25 +168,13 @@ class matrix_t
     {
         matrix_t result {quad(sz)};
         for (auto i = 0; i < sz; i++)
-            result.data[i][i] = val;
+            result.data[i * sz + i] = val;
         return result;
     }
 
     std::ostream& dump(std::ostream& out) const 
     {
-        out << '{';
-        for (auto i = 0; i < height; i++)
-        {
-            out << '{';
-            if (width != 0)
-            {
-                for (auto j = 0; j < width - 1; j++)
-                    out << data[i][j] << ' ';
-                out << data[i][width - 1];
-            }
-            out << '}';
-        }
-        out << '}';
+        
         return out;
     }    
 };
