@@ -11,64 +11,57 @@ template<typename T>
 class matrix_t
 {
     int height = 0, width = 0;
-    T** data = nullptr;
+    T* data = nullptr;
 
-    class proxy_row
+    int* row_order = nullptr;
+    int* col_order = nullptr;
+
+    void init_orders()
     {
-        int len = 0;
-        T* row = nullptr;
-
-        public:
-        proxy_row(int l, T* arr): len {l}, row {arr} {}
-
-        T& operator[] (int ind) {return row[ind];}
-        const T& operator[] (int ind) const {return row[ind];}
-
-        T& at(int ind)
-        {
-            if (ind >= len)
-                throw std::out_of_range{"request access to elem out of row"};
-            return row[ind];
-        }
-        const T& at (int ind) const
-        {
-            if (ind >= len)
-                throw std::out_of_range{"request access to elem out of row"};
-            return row[ind];
-        }
-    };
+        for (auto i = 0; i < height; i++)
+            row_order[i] = i;
+        for (auto i = 0; i < width; i++)
+            col_order[i] = i;
+    }
 
     public:
     matrix_t(int h, int w, T val = T{})
-    :height {h}, width {w}, data {new T*[height] {new T[width] {}}}
+    :height {h}, width {w}, data {new T[height * width]},
+     row_order {new int[height]}, col_order {new int[width]}
     {
         if (height < 0 || width < 0)
             throw std::length_error{"In constructor of matrix: height or width less null"};
-        for (auto i = 0; i < height; i++)
-            for (auto j = 0; j < width; j++)
-                data[i][j] = val;
+
+        for (auto i = 0; i < height * width; i++)
+            data[i] = val;
+        init_orders();
     }
 
     template<std::input_iterator it>
     matrix_t(int h, int w, it begin, it end)
-    :height {h}, width {w}, data {new T*[height] {new T[width] {}}}
+    :height {h}, width {w}, data {new T[height * width]},
+     row_order {new int[height]}, col_order {new int[width]}
     {
         if (height < 0 || width < 0)
             throw std::length_error{"In constructor of matrix: height or width less null"};
         
-        for (auto i = 0, itr = begin; i < height; i++)
-            for (auto j = 0; itr != end && j < width; j++, ++itr)
-                data[i][j] = *itr;    
+        for (auto i = 0, itr = begin; i < height * width || itr != end; i++, ++itr)
+            data[i] = *itr;
+        init_orders();    
     }
 
-    matrix_t(T val = T{}): height {1}, width {1}, data {new T*[height] {new T[width] {val}}} {}
+    matrix_t(T val = T{})
+    :height {1}, width {1}, data {new T[1]{val}},
+     row_order {new int[1]{0}}, col_order {new int[1]{0}} {}
 
     matrix_t(std::initializer_list<T> onedim_list)
-    :height {onedim_list.size()}, width {1}, data{new T*[height] {new T[width] {}}}
+    :height {onedim_list.size()}, width {1}, data {new T[height * width]},
+     row_order {new int[height]}, col_order {new int[width]}
     {
         auto i = 0;
         for (auto elem: onedim_list)
-            data[i++][0] = elem;
+            data[i++] = elem;
+        init_orders();
     }
 
     matrix_t(std::initializer_list<std::initializer_list<T>> twodim_list)
@@ -83,27 +76,29 @@ class matrix_t
                 max_width = row.size();
 
         width = max_width;
-        data = new T*[height] {new T[width] {}};
+        data = new T[height * width];
 
         std::size_t i = 0, j = 0;
         for (auto row: twodim_list)
         {
             for (auto elem: row)
-                data[i][j++] = elem;
+                data[i * width + j++] = elem;
             i++;
         }
     }
 
     matrix_t(const matrix_t& rhs)
-    :height {rhs.height}, width {rhs.width}, data {new T*[height]{new T[width] {}}}
+    :height {rhs.height}, width {rhs.width}, data {new T[height * width]},
+     row_order {new int[height]}, col_order {new int[width]}
     {
-        for (auto i = 0; i < height; i++)
-            for (auto j = 0; j < width; j++)
-                rhs.data[i][j] = data[i][j];
+        std::copy(rhs.data, rhs.data + height * width, data);
+        std::copy(rhs.row_order, rhs.row_order + height, row_order);
+        std::copy(rhs.col_order, rhs.col_order + width, col_order);
     }
 
     matrix_t(matrix_t&& rhs)
-    :height {rhs.height}, width {rhs.width}, data {rhs.data}
+    :height {rhs.height}, width {rhs.width}, data {rhs.data},
+     row_order (rhs.row_order), col_order {rhs.col_order}
     {}
 
     matrix_t& operator=(const matrix_t& rhs)
@@ -170,22 +165,6 @@ class matrix_t
         for (auto i = 0; i < sz; i++)
             result.data[i][i] = val;
         return result;
-    }
-
-    proxy_row operator[] (int ind) {return proxy_row{width, data[ind]};}
-    const proxy_row operator[] (int ind) const {return proxy_row{width, data[ind]};}
-
-    proxy_row at(int ind) &
-    {
-        if (ind >= height)
-                throw std::out_of_range{"request access to row out of matrix"};
-        return proxy_row{width, data[ind]};
-    }
-    const proxy_row at(int ind) const&
-    {
-        if (ind >= height)
-                throw std::out_of_range{"request access to row out of matrix"};
-        return proxy_row{width, data[ind]};
     }
 
     std::ostream& dump(std::ostream& out) const 
