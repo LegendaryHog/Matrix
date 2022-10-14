@@ -45,8 +45,11 @@ class matrix_t
         if (height < 0 || width < 0)
             throw std::length_error{"In constructor of matrix: height or width less null"};
         
-        for (auto i = 0, itr = begin; i < height * width || itr != end; i++, ++itr)
+        auto i = 0;
+        for (auto itr = begin; i < height * width && itr != end; i++, ++itr)
             data[i] = *itr;
+        for (; i < height * width; i++)
+            data[i] = T{};
         init_orders();    
     }
 
