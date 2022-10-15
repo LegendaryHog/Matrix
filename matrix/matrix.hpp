@@ -201,7 +201,23 @@ class matrix_t
         std::swap(col_order[ind1], col_order[ind2]);
     }
 
-    void swap_row_excp
+    bool operator==(const matrix_t& rhs) const
+    {
+        if (height != rhs.height)
+            return false;
+        if (width != rhs.width)
+            return false;
+        for (auto i = 0; i < height; i++)
+            for (auto j = 0; j < width; j++)
+                if (at(i, j) != rhs.at(i, j))
+                    return false;
+        return true;
+    }
+
+    bool operator!=(const matrix_t& rhs) const
+    {
+        return !(*this == rhs);
+    }
 
     std::ostream& dump(std::ostream& out) const 
     {
