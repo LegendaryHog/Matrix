@@ -55,20 +55,19 @@ class matrix_t
 
     matrix_t(T val = T{})
     :height {1}, width {1}, data {new T[1]{val}},
-     row_order {new int[1]{0}}, col_order {new int[1]{0}} {}
+     row_order {new int[1]{0}}, col_order {new int[1]{0}} {} 
 
     matrix_t(std::initializer_list<T> onedim_list)
-    :height {onedim_list.size()}, width {1}, data {new T[height * width]},
+    :height {static_cast<int>(onedim_list.size())}, width {1}, data {new T[height * width]},
      row_order {new int[height]}, col_order {new int[width]}
     {
         auto i = 0;
-        for (auto elem: onedim_list)
-            data[i++] = elem;
+        std::copy(onedim_list.begin(), onedim_list.end(), data);
         init_orders();
     }
 
     matrix_t(std::initializer_list<std::initializer_list<T>> twodim_list)
-    :height {twodim_list.size()}
+    :height {static_cast<int>(twodim_list.size())}
     {
         if (height == 0)
             throw std::logic_error{"Never know why - Ozzy Osbourne"};
@@ -78,16 +77,18 @@ class matrix_t
             if (row.size() > max_width)
                 max_width = row.size();
 
-        width = max_width;
+        width = static_cast<int>(max_width);
         data = new T[height * width];
-
-        std::size_t i = 0, j = 0;
+        auto act_row = 0;
         for (auto row: twodim_list)
         {
-            for (auto elem: row)
-                data[i * width + j++] = elem;
-            i++;
+            std::copy(row.begin(), row.end(), data + act_row * width);
+            if (static_cast<int>(row.size()) < width);
+                for (auto i = static_cast<int>(row.size()); i < width; i++)
+                    data[act_row * width + i] = T{};
+            act_row++;
         }
+        init_orders();
     }
 
     matrix_t(const matrix_t& rhs)
@@ -185,10 +186,22 @@ class matrix_t
         return data[row_order[row_ind] * width + col_order[col_ind]];
     }
 
-    T at(int row_ind, int col_ind) && noexcept
+    T at(int row_ind, int col_ind) const && noexcept
     {
         return data[row_order[row_ind] * width + col_order[col_ind]];
     }
+
+    void swap_row(int ind1, int ind2) &
+    {
+        std::swap(row_order[ind1], row_order[ind2]);
+    }
+
+    void swap_col(int ind1, int ind2) &
+    {
+        std::swap(col_order[ind1], col_order[ind2]);
+    }
+
+    void swap_row_excp
 
     std::ostream& dump(std::ostream& out) const 
     {
