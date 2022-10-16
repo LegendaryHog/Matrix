@@ -121,6 +121,27 @@ TEST(Constructors, move_ctor_and_move_assignment)
     #endif
 }
 
+TEST(Constructors, diag_ctors)
+{
+    std::vector<int> vec {1, 12, 34, -5};
+    std::list<int>   lst {37, 65, 91};
+
+    matrix_t<int> mat1 {matrix_t<int>::diag(4, 1)};
+    matrix_t<int> mat2 {matrix_t<int>::diag(2, vec.begin(), vec.end())};
+    matrix_t<int> mat3 {matrix_t<int>::diag(6, vec.begin(), vec.end())};
+    matrix_t<int> mat4 {matrix_t<int>::diag(vec.begin(), vec.end())};
+    matrix_t<int> mat5 {matrix_t<int>::diag(lst.begin(), lst.end())};
+
+    #ifdef PRINT
+    std::cout << "Diag ctor:" << std::endl;
+    std::cout << "{diag(4, 1)}:                      " << mat1 << std::endl;
+    std::cout << "{diag(2, vec.begin(), vec.end())}: " << mat2 << std::endl;
+    std::cout << "{diag(6, vec.begin(), vec.end())}: " << mat3 << std::endl;
+    std::cout << "{diag(vec.begin(), vec.end())}:    " << mat4 << std::endl;
+    std::cout << "{diag(lst.begin(), lst.end())}:    " << mat5 << std::endl << std::endl;
+    #endif
+}
+
 
 int main()
 {

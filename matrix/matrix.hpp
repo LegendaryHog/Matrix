@@ -150,20 +150,21 @@ class matrix_t
 
     static matrix_t quad(int sz, T val = T{})
     {
-        return matrix_t{sz, sz, val};
+        return matrix_t(sz, sz, val);
     }
 
     template<std::input_iterator it>
     static matrix_t quad(int sz, it begin, it end)
     {
-        return matrix_t{sz, sz, begin, end};
+        return matrix_t(sz, sz, begin, end);
     }
 
     template<std::input_iterator it>
     static matrix_t diag(int sz, it begin, it end)
     {
         matrix_t result {quad(sz)};
-        for (auto i = 0, itr = begin; i < sz && itr != end; ++itr, i++)
+        auto itr = begin;
+        for (auto i = 0; i < sz && itr != end; ++itr, i++)
             result.data[i * sz + i] = *itr;
         return result;
     }
