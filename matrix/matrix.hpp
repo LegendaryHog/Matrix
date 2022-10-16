@@ -10,11 +10,11 @@ namespace matrix{
 template<typename T>
 class matrix_t
 {
-    int height = 1, width = 1;
-    T* data = new T[1]{T{}};
+    int height = 0, width = 0;
+    T* data = nullptr;
 
-    int* row_order = new int[1]{0};
-    int* col_order = new int[1]{0};
+    int* row_order = nullptr;
+    int* col_order = nullptr;
 
     void init_orders()
     {
@@ -79,16 +79,18 @@ class matrix_t
 
         width = static_cast<int>(max_width);
         data = new T[height * width];
+        row_order = new int[height];
+        col_order = new int[width];
+        init_orders();
         auto act_row = 0;
         for (auto row: twodim_list)
         {
             std::copy(row.begin(), row.end(), data + act_row * width);
-            if (static_cast<int>(row.size()) < width);
+            if (static_cast<int>(row.size()) < width)
                 for (auto i = static_cast<int>(row.size()); i < width; i++)
                     data[act_row * width + i] = T{};
             act_row++;
         }
-        init_orders();
     }
 
     matrix_t(const matrix_t& rhs)
@@ -103,7 +105,13 @@ class matrix_t
     matrix_t(matrix_t&& rhs)
     :height {rhs.height}, width {rhs.width}, data {rhs.data},
      row_order (rhs.row_order), col_order {rhs.col_order}
-    {}
+    {
+        rhs.height = 0;
+        rhs.width  = 0;
+        rhs.data = nullptr;
+        rhs.row_order = nullptr;
+        rhs.col_order = nullptr;
+    }
 
     matrix_t& operator=(const matrix_t& rhs)
     {
@@ -124,11 +132,11 @@ class matrix_t
         if (this == &rhs)
             return *this;
 
-        height = rhs.height;
-        width  = rhs.width;
-        data   = rhs.data;
-        row_order = rhs.row_order;
-        col_order = rhs.col_order;
+        std::swap(height, rhs.height);
+        std::swap(width, rhs.width);
+        std::swap(data, rhs.data);
+        std::swap(row_order, rhs.row_order);
+        std::swap(col_order, rhs.col_order);
 
         return *this;
     }
