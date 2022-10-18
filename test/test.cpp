@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 
-#define PRINT
+//#define PRINT
 
 using namespace matrix;
 
@@ -140,6 +140,55 @@ TEST(Constructors, diag_ctors)
     std::cout << "{diag(vec.begin(), vec.end())}:    " << mat4 << std::endl;
     std::cout << "{diag(lst.begin(), lst.end())}:    " << mat5 << std::endl << std::endl;
     #endif
+}
+
+TEST(Methods, to)
+{
+    matrix_t<int> bigmat = {{1, 23, 56, 78, 93}, {13, -78, 72, 5667, -9}, {67, 89, 1, 34}};
+
+    EXPECT_EQ(bigmat.to(0, 0), 1);
+    EXPECT_EQ(bigmat.to(0, 4), 93);
+    EXPECT_EQ(bigmat.to(1, 1), -78);
+    EXPECT_EQ(bigmat.to(2, 4), 0);
+    EXPECT_EQ(bigmat.to(1, 3), 5667);
+    EXPECT_NE(bigmat.to(2, 0), 0);
+}
+
+TEST(Methods, swap_row)
+{
+    matrix_t<int> bigmat = {{34, -6, -8, 90, 55}, {12, 4, 7}, {-1, 3, 8, 9, 78}};
+    std::vector<int> origin_row0 = {34, -6, -8, 90, 55};
+    std::vector<int> origin_row1 = {12, 4, 7, 0, 0};
+    std::vector<int> origin_row2 = {-1, 3, 8, 9, 78};
+
+    bigmat.swap_row(0, 1);
+    for (auto i = 0; i < 5; i++)
+        EXPECT_EQ(bigmat.to(1, i), origin_row0[i]);
+    
+    for (auto i = 0; i < 5; i++)
+        EXPECT_EQ(bigmat.to(0, i), origin_row1[i]);
+
+    for (auto i = 0; i < 5; i++)
+        EXPECT_EQ(bigmat.to(2, i), origin_row2[i]);
+}
+
+TEST(Methods, _operator_eq_)
+{
+    matrix_t<int> mat1 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
+    matrix_t<int> mat2 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
+    matrix_t<int> mat3 = matrix_t<int>::quad(3, 1);
+    matrix_t<int> mat4 = matrix_t<int>::diag(2, -7);
+
+    EXPECT_TRUE(mat1 == mat1);
+    EXPECT_TRUE(mat2 == mat2);
+    EXPECT_TRUE(mat3 == mat3);
+    EXPECT_TRUE(mat4 == mat4);
+
+    EXPECT_TRUE(mat1 == mat2);
+
+    EXPECT_FALSE(mat1 == mat3);
+    EXPECT_FALSE(mat2 == mat3);
+    EXPECT_FALSE(mat3 == mat4);
 }
 
 

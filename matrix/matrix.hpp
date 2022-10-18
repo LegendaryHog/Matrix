@@ -10,37 +10,32 @@ namespace matrix{
 template<typename T>
 class matrix_t
 {
-    int height = 0, width = 0;
-    T* data = nullptr;
+    unsigned height = 0, width = 0;
+    T*  data = nullptr;
+    T** rows = nullptr;
 
-    int* row_order = nullptr;
-    int* col_order = nullptr;
-
-    void init_orders()
+    void init_rows()
     {
-        for (auto i = 0; i < height; i++)
-            row_order[i] = i;
-        for (auto i = 0; i < width; i++)
-            col_order[i] = i;
+        for (unsigned i = 0; i < height; i++)
+            rows[i] = data + i * width;
     }
 
     public:
-    matrix_t(int h, int w, T val = T{})
-    :height {h}, width {w}, data {new T[height * width]},
-     row_order {new int[height]}, col_order {new int[width]}
+    matrix_t(unsigned h, unsigned w, T val = T{})
+    :height {h}, width {w}, data {new T[height * width]}, rows {new T*[height]}
     {
         if (height < 0 || width < 0)
             throw std::length_error{"In constructor of matrix: height or width less null"};
 
         for (auto i = 0; i < height * width; i++)
             data[i] = val;
-        init_orders();
+
+        init_rows();
     }
 
     template<std::input_iterator it>
-    matrix_t(int h, int w, it begin, it end)
-    :height {h}, width {w}, data {new T[height * width]},
-     row_order {new int[height]}, col_order {new int[width]}
+    matrix_t(unsigned h, unsigned w, it begin, it end)
+    :height {h}, width {w}, data {new T[height * width]}, rows {new T*[height]}
     {
         if (height < 0 || width < 0)
             throw std::length_error{"In constructor of matrix: height or width less null"};
@@ -50,24 +45,22 @@ class matrix_t
             data[i] = *itr;
         for (; i < height * width; i++)
             data[i] = T{};
-        init_orders();    
+
+        init_rows();    
     }
 
     matrix_t(T val = T{})
-    :height {1}, width {1}, data {new T[1]{val}},
-     row_order {new int[1]{0}}, col_order {new int[1]{0}} {} 
+    :height {1}, width {1}, data {new T[1]{val}}, rows {new T*[1]{data}} {}
 
     matrix_t(std::initializer_list<T> onedim_list)
-    :height {static_cast<int>(onedim_list.size())}, width {1}, data {new T[height * width]},
-     row_order {new int[height]}, col_order {new int[width]}
+    :height {static_cast<unsigned>(onedim_list.size())}, width {1}, data {new T[height * width]}, rows {new T*[height]}
     {
-        auto i = 0;
         std::copy(onedim_list.begin(), onedim_list.end(), data);
-        init_orders();
+        init_rows();
     }
 
     matrix_t(std::initializer_list<std::initializer_list<T>> twodim_list)
-    :height {static_cast<int>(twodim_list.size())}
+    :height {static_cast<unsigned>(twodim_list.size())}
     {
         if (height == 0)
             throw std::logic_error{"Never know why - Ozzy Osbourne"};
@@ -77,40 +70,36 @@ class matrix_t
             if (row.size() > max_width)
                 max_width = row.size();
 
-        width = static_cast<int>(max_width);
+        width = max_width;
         data = new T[height * width];
-        row_order = new int[height];
-        col_order = new int[width];
-        init_orders();
+        rows = new T*[height];
         auto act_row = 0;
         for (auto row: twodim_list)
         {
             std::copy(row.begin(), row.end(), data + act_row * width);
-            if (static_cast<int>(row.size()) < width)
-                for (auto i = static_cast<int>(row.size()); i < width; i++)
+            if (row.size() < width)
+                for (auto i = row.size(); i < width; i++)
                     data[act_row * width + i] = T{};
             act_row++;
         }
+
+        init_rows();
     }
 
     matrix_t(const matrix_t& rhs)
-    :height {rhs.height}, width {rhs.width}, data {new T[height * width]},
-     row_order {new int[height]}, col_order {new int[width]}
+    :height {rhs.height}, width {rhs.width}, data {new T[height * width]}, rows {new T*[height]}
     {
         std::copy(rhs.data, rhs.data + height * width, data);
-        std::copy(rhs.row_order, rhs.row_order + height, row_order);
-        std::copy(rhs.col_order, rhs.col_order + width, col_order);
+        std::copy(rhs.rows, rhs.rows + height, rows);
     }
 
     matrix_t(matrix_t&& rhs)
-    :height {rhs.height}, width {rhs.width}, data {rhs.data},
-     row_order (rhs.row_order), col_order {rhs.col_order}
+    :height {rhs.height}, width {rhs.width}, data {rhs.data}, rows {rhs.rows}
     {
         rhs.height = 0;
         rhs.width  = 0;
         rhs.data = nullptr;
-        rhs.row_order = nullptr;
-        rhs.col_order = nullptr;
+        rhs.rows = nullptr;
     }
 
     matrix_t& operator=(const matrix_t& rhs)
@@ -118,12 +107,10 @@ class matrix_t
         height = rhs.height;
         width  = rhs.width;
         data = new T[height * width];
-        row_order = new int[height];
-        col_order = new int[width];
+        rows = new T*[height];
 
         std::copy(rhs.data, rhs.data + height * width, data);
-        std::copy(rhs.row_order, rhs.row_order + height, row_order);
-        std::copy(rhs.col_order, rhs.col_order + width, col_order);
+        std::copy(rhs.rows, rhs.rows + height, rows);
         return *this;
     }
 
@@ -135,8 +122,7 @@ class matrix_t
         std::swap(height, rhs.height);
         std::swap(width, rhs.width);
         std::swap(data, rhs.data);
-        std::swap(row_order, rhs.row_order);
-        std::swap(col_order, rhs.col_order);
+        std::swap(rows, rhs.rows);
 
         return *this;
     }
@@ -144,23 +130,22 @@ class matrix_t
     ~matrix_t()
     {
         delete[] data;
-        delete[] row_order;
-        delete[] col_order;
+        delete[] rows;   
     }
 
-    static matrix_t quad(int sz, T val = T{})
+    static matrix_t quad(unsigned sz, T val = T{})
     {
         return matrix_t(sz, sz, val);
     }
 
     template<std::input_iterator it>
-    static matrix_t quad(int sz, it begin, it end)
+    static matrix_t quad(unsigned sz, it begin, it end)
     {
         return matrix_t(sz, sz, begin, end);
     }
 
     template<std::input_iterator it>
-    static matrix_t diag(int sz, it begin, it end)
+    static matrix_t diag(unsigned sz, it begin, it end)
     {
         matrix_t result {quad(sz)};
         auto itr = begin;
@@ -177,7 +162,7 @@ class matrix_t
         return diag(sz, begin, end);
     }
 
-    static matrix_t diag(int sz, T val = T{})
+    static matrix_t diag(unsigned sz, T val = T{})
     {
         matrix_t result {quad(sz)};
         for (auto i = 0; i < sz; i++)
@@ -185,29 +170,24 @@ class matrix_t
         return result;
     }
 
-    T& at(int row_ind, int col_ind) & noexcept
+    T& to(unsigned row_ind, unsigned col_ind) & noexcept
     {
-        return data[row_order[row_ind] * width + col_order[col_ind]];
+        return rows[row_ind][col_ind];
     }
 
-    const T& at(int row_ind, int col_ind) const & noexcept
+    const T& to(unsigned row_ind, unsigned col_ind) const & noexcept
     {
-        return data[row_order[row_ind] * width + col_order[col_ind]];
+        return rows[row_ind][col_ind];
     }
 
-    T at(int row_ind, int col_ind) const && noexcept
+    T to(unsigned row_ind, unsigned col_ind) const && noexcept
     {
-        return data[row_order[row_ind] * width + col_order[col_ind]];
+        return rows[row_ind][col_ind];
     }
 
-    void swap_row(int ind1, int ind2) &
+    void swap_row(unsigned ind1, unsigned ind2) &
     {
-        std::swap(row_order[ind1], row_order[ind2]);
-    }
-
-    void swap_col(int ind1, int ind2) &
-    {
-        std::swap(col_order[ind1], col_order[ind2]);
+        std::swap(rows[ind1], rows[ind2]);
     }
 
     bool operator==(const matrix_t& rhs) const
@@ -218,7 +198,7 @@ class matrix_t
             return false;
         for (auto i = 0; i < height; i++)
             for (auto j = 0; j < width; j++)
-                if (at(i, j) != rhs.at(i, j))
+                if (to(i, j) != rhs.to(i, j))
                     return false;
         return true;
     }
@@ -235,8 +215,8 @@ class matrix_t
         {
             out << '{';
             for (auto j = 0; j < width - 1; j++)
-                out << at(i, j) << ' ';
-            out << at(i, width - 1) << '}';
+                out << to(i, j) << ' ';
+            out << to(i, width - 1) << '}';
             
         }
         out << '}';
