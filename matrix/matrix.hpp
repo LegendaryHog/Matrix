@@ -10,23 +10,20 @@ namespace matrix{
 template<typename T>
 class matrix_t
 {
-    unsigned height = 0, width = 0;
+    std::size_t height = 0, width = 0;
     T*  data = nullptr;
     T** rows = nullptr;
 
     void init_rows()
     {
-        for (unsigned i = 0; i < height; i++)
+        for (std::size_t i = 0; i < height; i++)
             rows[i] = data + i * width;
     }
 
     public:
-    matrix_t(unsigned h, unsigned w, T val = T{})
+    matrix_t(std::size_t h, std::size_t w, T val = T{})
     :height {h}, width {w}, data {new T[height * width]}, rows {new T*[height]}
     {
-        if (height < 0 || width < 0)
-            throw std::length_error{"In constructor of matrix: height or width less null"};
-
         for (auto i = 0; i < height * width; i++)
             data[i] = val;
 
@@ -34,7 +31,7 @@ class matrix_t
     }
 
     template<std::input_iterator it>
-    matrix_t(unsigned h, unsigned w, it begin, it end)
+    matrix_t(std::size_t h, std::size_t w, it begin, it end)
     :height {h}, width {w}, data {new T[height * width]}, rows {new T*[height]}
     {
         if (height < 0 || width < 0)
@@ -53,14 +50,14 @@ class matrix_t
     :height {1}, width {1}, data {new T[1]{val}}, rows {new T*[1]{data}} {}
 
     matrix_t(std::initializer_list<T> onedim_list)
-    :height {static_cast<unsigned>(onedim_list.size())}, width {1}, data {new T[height * width]}, rows {new T*[height]}
+    :height {onedim_list.size()}, width {1}, data {new T[height * width]}, rows {new T*[height]}
     {
         std::copy(onedim_list.begin(), onedim_list.end(), data);
         init_rows();
     }
 
     matrix_t(std::initializer_list<std::initializer_list<T>> twodim_list)
-    :height {static_cast<unsigned>(twodim_list.size())}
+    :height {twodim_list.size()}
     {
         if (height == 0)
             throw std::logic_error{"Never know why - Ozzy Osbourne"};
@@ -133,19 +130,19 @@ class matrix_t
         delete[] rows;   
     }
 
-    static matrix_t quad(unsigned sz, T val = T{})
+    static matrix_t quad(std::size_t sz, T val = T{})
     {
         return matrix_t(sz, sz, val);
     }
 
     template<std::input_iterator it>
-    static matrix_t quad(unsigned sz, it begin, it end)
+    static matrix_t quad(std::size_t sz, it begin, it end)
     {
         return matrix_t(sz, sz, begin, end);
     }
 
     template<std::input_iterator it>
-    static matrix_t diag(unsigned sz, it begin, it end)
+    static matrix_t diag(std::size_t sz, it begin, it end)
     {
         matrix_t result {quad(sz)};
         auto itr = begin;
@@ -162,7 +159,7 @@ class matrix_t
         return diag(sz, begin, end);
     }
 
-    static matrix_t diag(unsigned sz, T val = T{})
+    static matrix_t diag(std::size_t sz, T val = T{})
     {
         matrix_t result {quad(sz)};
         for (auto i = 0; i < sz; i++)
@@ -170,35 +167,33 @@ class matrix_t
         return result;
     }
 
-    T& to(unsigned row_ind, unsigned col_ind) & noexcept
+    T& to(std::size_t row_ind, std::size_t col_ind) & noexcept
     {
         return rows[row_ind][col_ind];
     }
 
-    const T& to(unsigned row_ind, unsigned col_ind) const & noexcept
+    const T& to(std::size_t row_ind, std::size_t col_ind) const & noexcept
     {
         return rows[row_ind][col_ind];
     }
 
-    T to(unsigned row_ind, unsigned col_ind) const && noexcept
+    T to(std::size_t row_ind, std::size_t col_ind) const && noexcept
     {
         return rows[row_ind][col_ind];
     }
 
-    void swap_row(unsigned ind1, unsigned ind2) &
+    void swap_row(std::size_t ind1, std::size_t ind2) &
     {
         std::swap(rows[ind1], rows[ind2]);
     }
 
     bool operator==(const matrix_t& rhs) const
     {
-        if (height != rhs.height)
-            return false;
-        if (width != rhs.width)
+        if (height != rhs.height || width != rhs.width)
             return false;
         for (auto i = 0; i < height; i++)
             for (auto j = 0; j < width; j++)
-                if (to(i, j) != rhs.to(i, j))
+                if (rows[i][j] != rhs.rows[i][j])
                     return false;
         return true;
     }
@@ -215,13 +210,66 @@ class matrix_t
         {
             out << '{';
             for (auto j = 0; j < width - 1; j++)
-                out << to(i, j) << ' ';
-            out << to(i, width - 1) << '}';
+                out << rows[i][j] << ' ';
+            out << rows[i][width - 1] << '}';
             
         }
         out << '}';
         return out;
-    }    
+    }
+    private:
+    
+    class proxy_row {
+        T* data = nullptr;
+        std::size_t sz = 0;
+
+        public:
+        proxy_row(matrix_t mat, std::size_t row_ind)
+        :data {mat.rows[row_ind]}, sz {rhs.width} {}
+
+        T&       operator[](std::size_t ind)       & noexcept {return data[ind];}
+        const T& operator[](std::size_t ind) const & noexcept {return data[ind];}
+        T        operator[](std::size_t ind)      && noexcept {return data[ind];}
+
+        T& at(std::size_t ind) &
+        {
+            if (ind >= width)
+                throw std::out_of_range{"ind in row more than width of matrix"};
+            return data[ind];
+        }
+
+        const T& at(std::size_t ind) const &
+        {
+            if (ind >= width)
+                throw std::out_of_range{"ind in row more than width of matrix"};
+            return data[ind];
+        }
+
+        T at(std::size_t ind) &&
+        {
+            if (ind >= width)
+                throw std::out_of_range{"ind in row more than width of matrix"};
+            return data[ind];
+        }
+    };
+
+    public:
+    proxy_row operator[](std::size_t ind) noexcept {return proxy_row{rows[ind], width};}
+    const proxy_row operator[](std::size_t ind) const noexcept {return proxy_row{rows[ind], width}};
+
+    proxy_row at(std::size_t ind)
+    {
+        if (ind >= height)
+            throw std::out_of_range{"ind in matrix more than height of matrix"};
+        return proxy_row{rows[ind], width};
+    }
+
+    const proxy_row at(std::size_t ind)
+    {
+        if (ind >= height)
+            throw std::out_of_range{"ind in matrix more than height of matrix"};
+        return proxy_row{rows[ind], width};
+    }
 };
 
 template<typename T>

@@ -172,7 +172,7 @@ TEST(Methods, swap_row)
         EXPECT_EQ(bigmat.to(2, i), origin_row2[i]);
 }
 
-TEST(Methods, _operator_eq_)
+TEST(Methods, operator_eq)
 {
     matrix_t<int> mat1 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
     matrix_t<int> mat2 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
@@ -190,6 +190,8 @@ TEST(Methods, _operator_eq_)
     EXPECT_FALSE(mat2 == mat3);
     EXPECT_FALSE(mat3 == mat4);
 }
+
+TEST(Methods, )
 
 
 int main()
