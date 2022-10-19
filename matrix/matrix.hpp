@@ -225,7 +225,7 @@ class matrix_t
 
         public:
         proxy_row(matrix_t mat, std::size_t row_ind)
-        :data {mat.rows[row_ind]}, sz {rhs.width} {}
+        :data {mat.rows[row_ind]}, sz {mat.width} {}
 
         T&       operator[](std::size_t ind)       & noexcept {return data[ind];}
         const T& operator[](std::size_t ind) const & noexcept {return data[ind];}
@@ -233,21 +233,21 @@ class matrix_t
 
         T& at(std::size_t ind) &
         {
-            if (ind >= width)
+            if (ind >= sz)
                 throw std::out_of_range{"ind in row more than width of matrix"};
             return data[ind];
         }
 
         const T& at(std::size_t ind) const &
         {
-            if (ind >= width)
+            if (ind >= sz)
                 throw std::out_of_range{"ind in row more than width of matrix"};
             return data[ind];
         }
 
         T at(std::size_t ind) &&
         {
-            if (ind >= width)
+            if (ind >= sz)
                 throw std::out_of_range{"ind in row more than width of matrix"};
             return data[ind];
         }
@@ -255,7 +255,7 @@ class matrix_t
 
     public:
     proxy_row operator[](std::size_t ind) noexcept {return proxy_row{rows[ind], width};}
-    const proxy_row operator[](std::size_t ind) const noexcept {return proxy_row{rows[ind], width}};
+    const proxy_row operator[](std::size_t ind) const noexcept {return proxy_row{rows[ind], width};}
 
     proxy_row at(std::size_t ind)
     {
@@ -264,7 +264,7 @@ class matrix_t
         return proxy_row{rows[ind], width};
     }
 
-    const proxy_row at(std::size_t ind)
+    const proxy_row at(std::size_t ind) const
     {
         if (ind >= height)
             throw std::out_of_range{"ind in matrix more than height of matrix"};
