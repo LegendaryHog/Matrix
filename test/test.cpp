@@ -191,7 +191,25 @@ TEST(Methods, operator_eq)
     EXPECT_FALSE(mat3 == mat4);
 }
 
-//TEST(Methods, )
+TEST(Methods, square_braces)
+{
+    const matrix_t<int> c_bigmat = {{1, 23, 56, 78, 93}, {13, -78, 72, 5667, -9}, {67, 89, 1, 34}};
+    matrix_t<int> bigmat = {{1, 23, 56, 78, 93}, {13, -78, 72, 5667, -9}, {67, 89, 1, 34}};
+
+    EXPECT_EQ(bigmat[0][0], 1);
+    EXPECT_EQ(bigmat[0][4], 93);
+    EXPECT_EQ(bigmat[1][1], -78);
+    EXPECT_EQ(bigmat[2][4], 0);
+    EXPECT_EQ(bigmat[1][3], 5667);
+    EXPECT_NE(bigmat[2][0], 0);
+
+    EXPECT_EQ(c_bigmat[0][0], 1);
+    EXPECT_EQ(c_bigmat[0][4], 93);
+    EXPECT_EQ(c_bigmat[1][1], -78);
+    EXPECT_EQ(c_bigmat[2][4], 0);
+    EXPECT_EQ(c_bigmat[1][3], 5667);
+    EXPECT_NE(c_bigmat[2][0], 0);
+}
 
 
 int main()
