@@ -218,7 +218,6 @@ class matrix_t
         return out;
     }
     private:
-    
     class proxy_row {
         T* data = nullptr;
         std::size_t sz = 0;
@@ -269,6 +268,53 @@ class matrix_t
         if (ind >= height)
             throw std::out_of_range{"ind in matrix more than height of matrix"};
         return proxy_row{*this, ind};
+    }
+
+    private:
+    std::size_t row_with_max_fst(std::size_t iteration)
+    {
+        std::size_t res = iteration;
+        for (std::size_t i = iteration; i < height; i++)
+            if (std::abs(static_cast<double>(to(i, iteration))) > std::abs(static_cast<double>(to(res, iteration))))
+                res = i;
+        return res;
+    }
+    bool dbl_cmp(double d1, double d2)
+    {
+        return std::abs(d1 - d2) < 1e-6;
+    }
+
+    using sign_t = double;
+    sign_t make_upper_triangular()
+    {
+        sign_t sign = 1.0;
+        for (std::size_t i = 0; i < height - 1; i++)
+        {
+            auto row_to_swap = row_with_max_fst(i);
+            if (row_to_swap != i)
+            {
+                swap_row(i, row_with_max_fst(i));
+                sign *= -1;
+            }
+            if (!dbl_cmp(static_cast<double>(to(i, i)), 0.0))
+                for (std::size_t j = i + 1; j < height; j++)
+                {
+                    double coef = static_cast<double>(to(j, i))/static_cast<double>(to(i, i));
+                    for (std::size_t k = i; k < width; k++)
+                        to(j, k) -= static_cast<T>(coef * static_cast<double>(to(i, k)));
+                }
+        }
+        return sign;
+    }
+    public:
+    T det() const
+    {
+        matrix_t cpy {*this};
+        sign_t sign = cpy.make_upper_triangular();
+        T res {1};
+        for (std::size_t i = 0; i < height; i++)
+            res *= cpy.to(i, i);
+        return static_cast<T>(sign) * res;
     }
 };
 

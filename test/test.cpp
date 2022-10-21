@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
-#include "matrix.hpp"
+
 #include <list>
 #include <vector>
 #include <set>
+
+#include "matrix.hpp"
+
 
 //#define PRINT
 
@@ -211,6 +214,23 @@ TEST(Methods, square_braces)
     EXPECT_NE(c_bigmat[2][0], 0);
 }
 
+bool dbl_cmp(double d1, double d2)
+{
+    return std::abs(d1 -d2) < 1e-6;
+}
+
+TEST(Methods, det)
+{
+    matrix_t<double> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
+    matrix_t<double> mat2 = {{1, 12, 4.7, -0.3}, {-78, 0.8, 9.6, 87}, {-5, -0.9, 4.7, 21.8}, {0, 2, 7, 9}};
+    matrix_t<double> mat3 = matrix_t<double>::diag(5, 1);
+    matrix_t<double> mat4 (4, 4, 5.6);
+
+    EXPECT_TRUE(dbl_cmp(mat1.det(), 31098.4));
+    EXPECT_TRUE(dbl_cmp(mat2.det(), -57462.22));
+    EXPECT_TRUE(dbl_cmp(mat3.det(), 1));
+    EXPECT_TRUE(dbl_cmp(mat4.det(), 0));
+}
 
 int main()
 {
