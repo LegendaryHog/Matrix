@@ -4,10 +4,11 @@
 #include <ostream>
 #include <iterator>
 #include <stdexcept>
+#include <type_traits>
 
 namespace matrix{
 
-template<typename T>
+template<typename T = double>
 class matrix_t
 {
     std::size_t height = 0, width = 0;
@@ -130,13 +131,13 @@ class matrix_t
         delete[] rows;   
     }
 
-    static matrix_t quad(std::size_t sz, T val = T{})
+    static matrix_t square(std::size_t sz, T val = T{})
     {
         return matrix_t(sz, sz, val);
     }
 
     template<std::input_iterator it>
-    static matrix_t quad(std::size_t sz, it begin, it end)
+    static matrix_t square(std::size_t sz, it begin, it end)
     {
         return matrix_t(sz, sz, begin, end);
     }
@@ -144,7 +145,7 @@ class matrix_t
     template<std::input_iterator it>
     static matrix_t diag(std::size_t sz, it begin, it end)
     {
-        matrix_t result {quad(sz)};
+        matrix_t result {square(sz)};
         auto itr = begin;
         for (auto i = 0; i < sz && itr != end; ++itr, i++)
             result.data[i * sz + i] = *itr;
@@ -161,7 +162,7 @@ class matrix_t
 
     static matrix_t diag(std::size_t sz, T val = T{})
     {
-        matrix_t result {quad(sz)};
+        matrix_t result {square(sz)};
         for (auto i = 0; i < sz; i++)
             result.data[i * sz + i] = val;
         return result;
@@ -187,13 +188,20 @@ class matrix_t
         std::swap(rows[ind1], rows[ind2]);
     }
 
+    private:
+    bool dbl_cmp(double d1, double d2) const
+    {
+        return std::abs(d1 - d2) <= 0.5*(std::abs(d1) + std::abs(d2))*1e-10;
+    }
+
+    public:
     bool operator==(const matrix_t& rhs) const
     {
         if (height != rhs.height || width != rhs.width)
             return false;
         for (auto i = 0; i < height; i++)
             for (auto j = 0; j < width; j++)
-                if (rows[i][j] != rhs.rows[i][j])
+                if (!dbl_cmp(static_cast<double>(rows[i][j]), static_cast<double>(rhs.rows[i][j])))
                     return false;
         return true;
     }
@@ -279,16 +287,19 @@ class matrix_t
                 res = i;
         return res;
     }
-    bool dbl_cmp(double d1, double d2)
+    bool dbl_cmp_zero(double d1) const
     {
-        return std::abs(d1 - d2) < 1e-6;
+        return std::abs(d1) < 1e-6;
     }
 
     using sign_t = double;
-    sign_t make_upper_triangular()
+    sign_t make_upper_triangular_square(std::size_t side_of_square)
     {
+        if (side_of_square > std::min(height, width))
+            throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
+    
         sign_t sign = 1.0;
-        for (std::size_t i = 0; i < height - 1; i++)
+        for (std::size_t i = 0; i < side_of_square - 1; i++)
         {
             auto row_to_swap = row_with_max_fst(i);
             if (row_to_swap != i)
@@ -296,25 +307,162 @@ class matrix_t
                 swap_row(i, row_with_max_fst(i));
                 sign *= -1;
             }
-            if (!dbl_cmp(static_cast<double>(to(i, i)), 0.0))
-                for (std::size_t j = i + 1; j < height; j++)
+            if (!dbl_cmp_zero(rows[i][i]))
+                for (std::size_t j = i + 1; j < side_of_square; j++)
                 {
-                    double coef = static_cast<double>(to(j, i))/static_cast<double>(to(i, i));
+                    double coef = rows[j][i] / rows[i][i];
                     for (std::size_t k = i; k < width; k++)
-                        to(j, k) -= static_cast<T>(coef * static_cast<double>(to(i, k)));
+                        rows[j][k] -= coef * rows[i][k];
                 }
         }
         return sign;
     }
-    public:
-    T det() const
+
+    void make_eye_square_from_upper_triangular_square(std::size_t side_of_square)
     {
+        for (std::size_t i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
+        {
+            double coef = rows[i][i];
+            for (std::size_t j = i; j < width; j++)
+                rows[i][j] = rows[i][j] / coef;
+        }
+        
+        for (std::size_t i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
+            for (std::size_t j = 0; j < i; j++)
+            {
+                double coef = rows[j][i];
+                for(std::size_t k = i; k < width; k++)
+                    rows[j][k] -= rows[i][k] * coef;
+            }
+    }
+
+    std::size_t rang_for_upper_triangular() const
+    {
+        std::size_t rang_mat = 0;
+        std::size_t square_sz  = std::min(height, width);
+        for (std::size_t i = 0; i < square_sz; i++)
+            if (!dbl_cmp_zero(static_cast<double>(rows[i][i])))
+                rang_mat++;
+        return rang_mat;      
+    }
+
+    std::szie_t factorial(std::size_t num) const
+    {
+        std::size_t res = 0;
+        for (std::size_t i = 1; i <= num; i++)
+            res *= i;
+        return res;
+    }
+
+    T recursive_det(T** mat_arr, std::size_t sz)
+    {
+        T res {};
+        
+    }
+
+    T iterartive_det (matrix_t mat)
+    {
+        for (std::size_t ind = 0, end = factorial(height); ind < end; ind++)
+        {
+
+        }
+    }
+
+/*int determinant( int matrix[10][10], int n)
+{
+    int det = 0;
+    int submatrix[10][10];
+    if (n == 2)
+        return ((matrix[0][0] * matrix[1][1]) - (matrix[1][0] * matrix[0][1]));
+    else
+    {
+        for (int x = 0; x < n; x++)
+        {
+            int subi = 0;
+            for (int i = 1; i < n; i++)
+            {
+                int subj = 0;
+                for (int j = 0; j < n; j++)
+                {
+                    if (j == x)
+                        continue;
+                    submatrix[subi][subj] = matrix[i][j];
+                    subj++;
+                }
+                subi++;
+            }
+            det += (pow(-1, x) * matrix[0][x] * determinant(submatrix, n - 1));
+        }
+    }
+    return det;
+}*/
+
+    public:
+    std::size_t rang() const
+    {
+        make_upper_triangular_square(std::min(height, width));
+        return rang_for_upper_triangular();
+    }
+
+    T det() const requires std::is_floating_point_v<T>
+    {
+        if (height != width)
+            throw std::invalid_argument{"try to get det() of no square matrix"};
+
         matrix_t cpy {*this};
-        sign_t sign = cpy.make_upper_triangular();
+        sign_t sign = cpy.make_upper_triangular_square(height);
         T res {1};
         for (std::size_t i = 0; i < height; i++)
-            res *= cpy.to(i, i);
-        return static_cast<T>(sign) * res;
+            res *= cpy.rows[i][i];
+        return sign * res;
+    }
+
+    T det() const
+    {
+        if (height != width)
+            throw std::invalid_argument{"try to get det() of no square matrix"};
+
+        matrix_t cpy {*this};
+        return T{1};
+    }
+
+    std::pair<bool, matrix_t> inverse_pair() const
+    {
+        if (height != width)
+            throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
+
+        matrix_t extended_mat (height, 2*height);
+        for (std::size_t i = 0; i < height; i++)
+            for (std::size_t j = 0; j < height; j++)
+                extended_mat.rows[i][j] = rows[i][j];
+        
+        for (std::size_t i = 0; i < height; i++)
+            extended_mat.rows[i][i + height] = T{1};
+
+        extended_mat.make_upper_triangular_square(extended_mat.height);
+
+        if (extended_mat.rang_for_upper_triangular() != height)
+            return {false, matrix_t{*this}};
+
+        extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height);
+        
+        matrix_t res (height, height);
+        for (std::size_t i = 0; i < height; i++)
+            for (std::size_t j = 0; j < height; j++)
+                res.rows[i][j] = extended_mat.rows[i][j + height];
+
+        std::cout << res << std::endl;
+        
+        return {true, res};
+    }
+
+    matrix_t inverse() const
+    {
+        auto res_pair = inverse_pair();
+        if (!res_pair.first)
+            throw std::invalid_argument{"try to get inverse matrix for matrix with det equal to zero"};
+
+        return res_pair.second;
     }
 };
 

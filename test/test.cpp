@@ -179,7 +179,7 @@ TEST(Methods, operator_eq)
 {
     matrix_t<int> mat1 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
     matrix_t<int> mat2 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
-    matrix_t<int> mat3 = matrix_t<int>::quad(3, 1);
+    matrix_t<int> mat3 = matrix_t<int>::square(3, 1);
     matrix_t<int> mat4 = matrix_t<int>::diag(2, -7);
 
     EXPECT_TRUE(mat1 == mat1);
@@ -216,7 +216,7 @@ TEST(Methods, square_braces)
 
 bool dbl_cmp(double d1, double d2)
 {
-    return std::abs(d1 -d2) < 1e-6;
+    return std::abs(d1 -d2) <= 0.5*(std::abs(d1) + std::abs(d2))*1e-10;
 }
 
 TEST(Methods, det)
@@ -225,11 +225,26 @@ TEST(Methods, det)
     matrix_t<double> mat2 = {{1, 12, 4.7, -0.3}, {-78, 0.8, 9.6, 87}, {-5, -0.9, 4.7, 21.8}, {0, 2, 7, 9}};
     matrix_t<double> mat3 = matrix_t<double>::diag(5, 1);
     matrix_t<double> mat4 (4, 4, 5.6);
+    matrix_t<double> mat5 = {{313, 0, 75, 6, 790, 3},
+                             {-517, 78, 0.8, 51, 67, -9},
+                             {0, 34, 7, -9, -32, -3.3},
+                             {-8, 90, 56, 74, 28496, -1},
+                             {34567, 2347, 0, 0, 34, 1},
+                             {2, 5, 89, 1, 0, 2289}};
 
     EXPECT_TRUE(dbl_cmp(mat1.det(), 31098.4));
     EXPECT_TRUE(dbl_cmp(mat2.det(), -57462.22));
     EXPECT_TRUE(dbl_cmp(mat3.det(), 1));
     EXPECT_TRUE(dbl_cmp(mat4.det(), 0));
+    EXPECT_TRUE(dbl_cmp(mat5.det(), 480076249541075524.76));;
+}
+
+TEST(Methods, inverse)
+{
+    matrix_t<double> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
+    matrix_t<double> mat2 = {{4, 9}, {1, 2}};
+
+    EXPECT_TRUE(mat1.inverse().inverse() == mat1);
 }
 
 int main()
