@@ -214,37 +214,85 @@ TEST(Methods, square_braces)
     EXPECT_NE(c_bigmat[2][0], 0);
 }
 
-bool dbl_cmp(double d1, double d2)
-{
-    return std::abs(d1 -d2) <= 0.5*(std::abs(d1) + std::abs(d2))*1e-10;
-}
+struct DblCmp {
+    bool operator()(double lhs, double rhs) const
+    {
+        return std::abs(lhs - rhs) <= 0.5*(std::abs(lhs) + std::abs(rhs))*1e-10;
+    }
+};
 
-TEST(Methods, det)
+TEST(Methods, det_for_double)
 {
-    matrix_t<double> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
-    matrix_t<double> mat2 = {{1, 12, 4.7, -0.3}, {-78, 0.8, 9.6, 87}, {-5, -0.9, 4.7, 21.8}, {0, 2, 7, 9}};
-    matrix_t<double> mat3 = matrix_t<double>::diag(5, 1);
-    matrix_t<double> mat4 (4, 4, 5.6);
-    matrix_t<double> mat5 = {{313, 0, 75, 6, 790, 3},
+    DblCmp dbl_cmp {};
+    matrix_t<double, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
+    matrix_t<double, DblCmp> mat2 = {{1, 12, 4.7, -0.3}, {-78, 0.8, 9.6, 87}, {-5, -0.9, 4.7, 21.8}, {0, 2, 7, 9}};
+    matrix_t<double, DblCmp> mat3 = matrix_t<double, DblCmp>::diag(5, 1);
+    matrix_t<double, DblCmp> mat4 (4, 4, 5.6);
+    matrix_t<double, DblCmp> mat5 = {{313, 0, 75, 6, 790, 3},
                              {-517, 78, 0.8, 51, 67, -9},
                              {0, 34, 7, -9, -32, -3.3},
                              {-8, 90, 56, 74, 28496, -1},
                              {34567, 2347, 0, 0, 34, 1},
                              {2, 5, 89, 1, 0, 2289}};
 
+    matrix_t<double, DblCmp> mat6 = {{1, 0, 34},
+                                     {23, 0, -11},
+                                     {2, 0, 2}};
+
     EXPECT_TRUE(dbl_cmp(mat1.det(), 31098.4));
     EXPECT_TRUE(dbl_cmp(mat2.det(), -57462.22));
-    EXPECT_TRUE(dbl_cmp(mat3.det(), 1));
-    EXPECT_TRUE(dbl_cmp(mat4.det(), 0));
-    EXPECT_TRUE(dbl_cmp(mat5.det(), 480076249541075524.76));;
+    EXPECT_TRUE(dbl_cmp(mat3.det(), 1.0));
+    EXPECT_TRUE(dbl_cmp(mat4.det(), 0.0));
+    EXPECT_TRUE(dbl_cmp(mat5.det(), 480076249541075524.76));
+    EXPECT_TRUE(dbl_cmp(mat6.det(), 0.0));
 }
 
 TEST(Methods, inverse)
 {
-    matrix_t<double> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
-    matrix_t<double> mat2 = {{4, 9}, {1, 2}};
+    matrix_t<double, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
+    matrix_t<double, DblCmp> mat2 = {{4, 9}, {1, 2}};
 
     EXPECT_TRUE(mat1.inverse().inverse() == mat1);
+}
+
+TEST(Methods, det_for_other)
+{
+    matrix_t mat1 = matrix_t<>::diag(11, 1);
+    matrix_t mat2 = {{1,  0, 1},
+                     {23, 0, 13},
+                     {3,  0, 4}};
+
+    matrix_t mat3 = {{12, -3, 5}, {7, 8, 9}, {4, -7, 8}};
+    matrix_t mat4 = {{2, 3}, {2, 17}};
+    matrix_t mat5 = {{12, 0}, {2, 0}};
+    matrix_t mat6 = {{0, 12}, {0, 2}};
+
+    EXPECT_EQ(mat1.det(), 1);
+    EXPECT_EQ(mat2.det(), 0);
+    EXPECT_EQ(mat3.det(), 1179);
+    EXPECT_EQ(mat4.det(), 28);
+    EXPECT_EQ(mat5.det(), 0);
+    EXPECT_EQ(mat6.det(), 0);
+}
+
+TEST(Methods, rang)
+{
+    matrix_t mat1 = matrix_t<>::diag(11, 1);
+    matrix_t mat2 = {{1,  0, 1},
+                     {23, 0, 13},
+                     {3,  0, 4}};
+
+    matrix_t mat3 = {{12, -3, 5}, {7, 8, 9}, {4, -7, 8}};
+    matrix_t mat4 = {{2, 3}, {2, 17}};
+    matrix_t mat5 = {{12, 0}, {2, 0}};
+    matrix_t mat6 = {{0, 12}, {0, 2}};
+
+    EXPECT_EQ(mat1.rang(), 11);
+    EXPECT_EQ(mat2.rang(), 2);
+    EXPECT_EQ(mat3.rang(), 3);
+    EXPECT_EQ(mat4.rang(), 2);
+    EXPECT_EQ(mat5.rang(), 1);
+    EXPECT_EQ(mat6.rang(), 1);
 }
 
 int main()
