@@ -266,6 +266,8 @@ TEST(Methods, det_for_other)
     matrix_t mat4 = {{2, 3}, {2, 17}};
     matrix_t mat5 = {{12, 0}, {2, 0}};
     matrix_t mat6 = {{0, 12}, {0, 2}};
+    matrix_t mat7 = {{0, 12},{2, 0}};
+    matrix_t mat8 = {{12, 3, 0, 0}, {3, -5}, {1, -9}, {3, -7}};
 
     EXPECT_EQ(mat1.det(), 1);
     EXPECT_EQ(mat2.det(), 0);
@@ -273,9 +275,11 @@ TEST(Methods, det_for_other)
     EXPECT_EQ(mat4.det(), 28);
     EXPECT_EQ(mat5.det(), 0);
     EXPECT_EQ(mat6.det(), 0);
+    EXPECT_EQ(mat7.det(), -24);
+    EXPECT_EQ(mat8.det(), 0);
 }
 
-TEST(Methods, rang)
+TEST(Methods, rang_with_no_floating_points_types)
 {
     matrix_t mat1 = matrix_t<>::diag(11, 1);
     matrix_t mat2 = {{1,  0, 1},
@@ -286,6 +290,8 @@ TEST(Methods, rang)
     matrix_t mat4 = {{2, 3}, {2, 17}};
     matrix_t mat5 = {{12, 0}, {2, 0}};
     matrix_t mat6 = {{0, 12}, {0, 2}};
+    matrix_t mat7 = {{0, 12},{2, 0}};
+    matrix_t mat8 = {{12, 3, 0, 0}, {3, -5}, {1, -9}, {3, -7}};
 
     EXPECT_EQ(mat1.rang(), 11);
     EXPECT_EQ(mat2.rang(), 2);
@@ -293,6 +299,9 @@ TEST(Methods, rang)
     EXPECT_EQ(mat4.rang(), 2);
     EXPECT_EQ(mat5.rang(), 1);
     EXPECT_EQ(mat6.rang(), 1);
+    EXPECT_EQ(mat7.rang(), 2);
+    EXPECT_EQ(mat8.rang(), 2);
+    
 }
 
 int main()
