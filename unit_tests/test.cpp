@@ -268,6 +268,11 @@ TEST(Methods, det_for_other)
     matrix_t mat6 = {{0, 12}, {0, 2}};
     matrix_t mat7 = {{0, 12},{2, 0}};
     matrix_t mat8 = {{12, 3, 0, 0}, {3, -5}, {1, -9}, {3, -7}};
+    matrix_t mat9 = {{1, 2, 0, 0, 3},
+                     {3, -4, 0, 0, 3},
+                     {2, -8, 0, 0, 9},
+                     {15, -17, 0, 0, 5}, 
+                     {32, 31, 0, 0, 1}};
 
     EXPECT_EQ(mat1.det(), 1);
     EXPECT_EQ(mat2.det(), 0);
@@ -277,6 +282,7 @@ TEST(Methods, det_for_other)
     EXPECT_EQ(mat6.det(), 0);
     EXPECT_EQ(mat7.det(), -24);
     EXPECT_EQ(mat8.det(), 0);
+    EXPECT_EQ(mat9.det(), 0);
 }
 
 TEST(Methods, rang_with_no_floating_points_types)
@@ -293,6 +299,19 @@ TEST(Methods, rang_with_no_floating_points_types)
     matrix_t mat7 = {{0, 12},{2, 0}};
     matrix_t mat8 = {{12, 3, 0, 0}, {3, -5}, {1, -9}, {3, -7}};
 
+    matrix_t mat9 = {{1,   2,  0, 0, 3},
+                     {3,  -4,  0, 0, 3},
+                     {2,  -8,  0, 0, 9},
+                     {15, -17, 0, 0, 5}, 
+                     {32,  31, 0, 0, 1}};
+
+    matrix_t mat10 = {{1,  2,   0, 3, 0},
+                      {3,  -4,  0, 3, 0},
+                      {2,  -8,  0, 9, 0},
+                      {15, -17, 0, 5, 0},
+                      {32,  32, 0, 1, 0}};
+
+
     EXPECT_EQ(mat1.rang(), 11);
     EXPECT_EQ(mat2.rang(), 2);
     EXPECT_EQ(mat3.rang(), 3);
@@ -301,6 +320,8 @@ TEST(Methods, rang_with_no_floating_points_types)
     EXPECT_EQ(mat6.rang(), 1);
     EXPECT_EQ(mat7.rang(), 2);
     EXPECT_EQ(mat8.rang(), 2);
+    EXPECT_EQ(mat9.rang(), 3);
+    EXPECT_EQ(mat10.rang(), 3);
     
 }
 
