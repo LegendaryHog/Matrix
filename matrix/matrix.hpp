@@ -325,7 +325,7 @@ private:
             else
                 sign = T{};
         }
-        return rows[side_of_square -1][side_of_square - 1] * sign;
+        return rows[side_of_square - 1][side_of_square - 1] * sign;
     }
 //------------------------------------------------------------------------------------------------------
 
@@ -384,7 +384,7 @@ public:
             throw std::invalid_argument{"try to get det() of no square matrix"};
 
         matrix_t cpy {*this};
-        return cpy.make_upper_triangular_square(height);;
+        return cpy.make_upper_triangular_square(height);
     }
 
     std::pair<bool, matrix_t> inverse_pair() const
@@ -432,7 +432,7 @@ public:
     T* end() & {return data + size;}
     const T* cend() const & {return data + size;}
 
-    bool operator==(const matrix_t& rhs) const
+    bool equal_to(const matrix_t& rhs) const
     {
         if (height != rhs.height || width != rhs.width)
             return false;
@@ -445,11 +445,6 @@ public:
                 return false;
         
         return true;
-    }
-
-    bool operator!=(const matrix_t& rhs) const
-    {
-        return !(*this == rhs);
     }
 
     matrix_t& operator+=(const matrix_t& rhs)
@@ -491,6 +486,18 @@ public:
         return *this;
     }
 };
+
+template<typename T = int, class Cmp = std::equal_to<T>>
+bool operator==(const matrix_t<T, Cmp>& lhs, const matrix_t<T, Cmp>& rhs)
+{
+    return lhs.equal_to(rhs);
+}
+
+template<typename T = int, class Cmp = std::equal_to<T>>
+bool operator!=(const matrix_t<T, Cmp>& lhs, const matrix_t<T, Cmp>& rhs)
+{
+    return !lhs.equal_to(rhs);
+}
 
 template<typename T = int, class Cmp = std::equal_to<T>>
 matrix_t<T, Cmp> operator+(const matrix_t<T, Cmp>& lhs, const matrix_t<T, Cmp>& rhs)
