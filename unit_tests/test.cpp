@@ -362,6 +362,14 @@ TEST(Operators, operator_mul)
     EXPECT_EQ(two_mat, mat * 2);
 }
 
+TEST(Operators, operator_div)
+{
+    matrix_t half_mat = {{12, -5, 1}, {3, 9, -5}};
+    matrix_t mat = {{24, -10, 2}, {6, 18, -10}};
+
+    EXPECT_EQ(half_mat, mat / 2);
+}
+
 int main()
 {
     testing::InitGoogleTest();
