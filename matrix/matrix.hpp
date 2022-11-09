@@ -19,6 +19,7 @@ class matrix_t
     T*  data_ = nullptr;
     T** rows_ = nullptr;
     Cmp cmp;
+    static const bool ar_div = ArDiv;
 
     void init_rows()
     {
@@ -274,7 +275,7 @@ private:
     }
 
 //------------------------------- FOR FLOATING POINT TYPES ---------------------------------------------
-    T make_upper_triangular_square(std::size_t side_of_square) requires (ArDiv == true)
+    T make_upper_triangular_square(std::size_t side_of_square) requires (ar_div == true)
     {
         if (side_of_square > std::min(height_, width_))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
@@ -391,7 +392,7 @@ public:
         return cpy.make_upper_triangular_square(height_);
     }
 
-    std::pair<bool, matrix_t> inverse_pair() const requires (ArDiv == true)
+    std::pair<bool, matrix_t> inverse_pair() const requires (ar_div == true)
     {
         if (height_ != width_)
             throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
@@ -419,7 +420,7 @@ public:
         return {true, res};
     }
 
-    matrix_t inverse() const requires (ArDiv == true)
+    matrix_t inverse() const requires (ar_div == true)
     {
         auto res_pair = inverse_pair();
         if (!res_pair.first)
