@@ -224,18 +224,18 @@ struct DblCmp {
 TEST(Methods, det_for_double)
 {
     DblCmp dbl_cmp {};
-    matrix_t<double, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
-    matrix_t<double, DblCmp> mat2 = {{1, 12, 4.7, -0.3}, {-78, 0.8, 9.6, 87}, {-5, -0.9, 4.7, 21.8}, {0, 2, 7, 9}};
-    matrix_t<double, DblCmp> mat3 = matrix_t<double, DblCmp>::diag(5, 1);
-    matrix_t<double, DblCmp> mat4 (4, 4, 5.6);
-    matrix_t<double, DblCmp> mat5 = {{313, 0, 75, 6, 790, 3},
+    matrix_t<double, true, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
+    matrix_t<double, true, DblCmp> mat2 = {{1, 12, 4.7, -0.3}, {-78, 0.8, 9.6, 87}, {-5, -0.9, 4.7, 21.8}, {0, 2, 7, 9}};
+    matrix_t<double, true, DblCmp> mat3 = matrix_t<double, true, DblCmp>::diag(5, 1);
+    matrix_t<double, true, DblCmp> mat4 (4, 4, 5.6);
+    matrix_t<double, true, DblCmp> mat5 = {{313, 0, 75, 6, 790, 3},
                              {-517, 78, 0.8, 51, 67, -9},
                              {0, 34, 7, -9, -32, -3.3},
                              {-8, 90, 56, 74, 28496, -1},
                              {34567, 2347, 0, 0, 34, 1},
                              {2, 5, 89, 1, 0, 2289}};
 
-    matrix_t<double, DblCmp> mat6 = {{1, 0, 34},
+    matrix_t<double, true, DblCmp> mat6 = {{1, 0, 34},
                                      {23, 0, -11},
                                      {2, 0, 2}};
 
@@ -249,8 +249,8 @@ TEST(Methods, det_for_double)
 
 TEST(Methods, inverse)
 {
-    matrix_t<double, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
-    matrix_t<double, DblCmp> mat2 = {{4, 9}, {1, 2}};
+    matrix_t<double, true, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
+    matrix_t<double, true, DblCmp> mat2 = {{4, 9}, {1, 2}};
 
     EXPECT_TRUE(mat1.inverse().inverse() == mat1);
 }
@@ -322,7 +322,6 @@ TEST(Methods, rang_with_no_floating_points_types)
     EXPECT_EQ(mat8.rang(), 2);
     EXPECT_EQ(mat9.rang(), 3);
     EXPECT_EQ(mat10.rang(), 3);
-    
 }
 
 int main()
