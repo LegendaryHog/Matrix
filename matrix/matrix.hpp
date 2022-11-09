@@ -93,7 +93,7 @@ public:
     :height_ {rhs.height_}, width_ {rhs.width_}, data_ {new T[height_ * width_]}, rows_ {new T*[height_]}
     {
         std::copy(rhs.data_, rhs.data_ + height_ * width_, data_);
-        std::copy(rhs.rows_, rhs.rows_ + height_, rows_);
+        init_rows();
     }
 
     matrix_t(matrix_t&& rhs)
@@ -113,7 +113,7 @@ public:
         rows_ = new T*[height_];
 
         std::copy(rhs.data_, rhs.data_ + height_ * width_, data_);
-        std::copy(rhs.rows_, rhs.rows_ + height_, rows_);
+        init_rows();
         return *this;
     }
 
@@ -546,8 +546,7 @@ matrix_t<T, ArDiv, Cmp> operator*(const matrix_t<T, ArDiv, Cmp>& lhs, const T& r
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
 matrix_t<T, ArDiv, Cmp> operator*(const T& lhs, const matrix_t<T, ArDiv, Cmp>& rhs)
 {
-    matrix_t<T, ArDiv, Cmp> rhs_cpy {rhs};
-    return (rhs_cpy *= lhs);
+    return rhs * lhs;
 }
 
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>

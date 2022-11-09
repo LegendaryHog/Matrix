@@ -252,7 +252,8 @@ TEST(Methods, inverse)
     matrix_t<double, true, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
     matrix_t<double, true, DblCmp> mat2 = {{4, 9}, {1, 2}};
 
-    EXPECT_TRUE(mat1.inverse().inverse() == mat1);
+    EXPECT_EQ(mat1.inverse().inverse(), mat1);
+    EXPECT_EQ(mat2.inverse().inverse(), mat2);
 }
 
 TEST(Methods, det_for_other)
@@ -322,6 +323,43 @@ TEST(Methods, rang_with_no_floating_points_types)
     EXPECT_EQ(mat8.rang(), 2);
     EXPECT_EQ(mat9.rang(), 3);
     EXPECT_EQ(mat10.rang(), 3);
+}
+
+TEST(Operators, _operator_plus_)
+{
+    matrix_t lhs1 = {{12, -3, 4}, {31, -5, 8}};
+    matrix_t rhs1 = {{1, 0, 3}, {12, 3, 4}};
+    matrix_t res1 = lhs1 + rhs1;
+    matrix_t res1_example = {{13, -3, 7}, {43, -2, 12}};
+
+    EXPECT_EQ(res1_example, res1);
+}
+
+TEST(Operators, operator_unary_minus)
+{
+    matrix_t mat = {{-3, 7, -9}, {14, -5, -8}, {21, -4, -7}};
+    matrix_t minus_mat = {{3, -7, 9}, {-14, 5, 8}, {-21, 4, 7}};
+
+    EXPECT_EQ(-mat, minus_mat);
+}
+
+TEST(Operators, operator_minus)
+{
+    matrix_t lhs1 = {{12, -3, 4}, {31, -5, 8}};
+    matrix_t rhs1 = {{1, 0, 3}, {12, 3, 4}};
+    matrix_t res1 = lhs1 - rhs1;
+    matrix_t res1_example = {{11, -3, 1}, {19, -8, 4}};
+
+    EXPECT_EQ(res1_example, res1);
+}
+
+TEST(Operators, operator_mul)
+{
+    matrix_t mat = {{12, -5, 1}, {3, 9, -5}};
+    matrix_t two_mat = {{24, -10, 2}, {6, 18, -10}};
+
+    EXPECT_EQ(two_mat, 2 * mat);
+    EXPECT_EQ(two_mat, mat * 2);
 }
 
 int main()
