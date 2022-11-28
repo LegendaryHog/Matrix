@@ -36,6 +36,7 @@ class MatrixContainer
     size_t* col_order_ = init_col_order();
 
 public:
+//------------------------=| Classic ctors start |=------------------------
     MatrixContainer(size_t h, size_t w, T val = T{})
     :height_ {h}, width_ {w}, data_ {new T[height_ * width_]}
     {
@@ -89,6 +90,9 @@ public:
             act_row++;
         }
     }
+//------------------------=| Classic ctors end |=--------------------------
+
+//------------------------=| Big five start |=-----------------------------
 
     MatrixContainer(const MatrixContainer& rhs)
     :height_ {rhs.height_}, width_ {rhs.width_}, data_ {new T[height_ * width_]},
@@ -134,11 +138,50 @@ public:
         return *this;
     }
 
-    ~MatrixContainer()
+    virtual ~MatrixContainer()
     {
         delete[] data_;
         delete[] row_order_;
         delete[] col_order_;
+    }
+//------------------------=| Big five end|=--------------------------------
+
+//------------------------=| Acces operators start |=----------------------
+
+    T& to(size_t i, size_t j) & noexcept
+    {
+        return data_[row_order_[i] * width_ + col_order_[j]];
+    }
+
+    const T& to(size_t i, size_t j) const& noexcept
+    {
+        return data_[row_order_[i] * width_ + col_order_[j]];
+    }
+
+    T to(size_t i, size_t j) && noexcept
+    {
+        return data_[row_order_[i] * width_ + col_order_[j]];
+    }
+
+    T& at(size_t i, size_t j) &
+    {
+        if (i >= height_ || j >= width_)
+            throw std::out_of_range{"try to get access to element out of matrix"};
+        return data_[row_order_[i] * width_ + col_order_[j]];
+    }
+
+    const T& at(size_t i, size_t j) const&
+    {
+        if (i >= height_ || j >= width_)
+            throw std::out_of_range{"try to get access to element out of matrix"};
+        return data_[row_order_[i] * width_ + col_order_[j]];
+    }
+
+    T at(size_t i, size_t j) &&
+    {
+        if (i >= height_ || j >= width_)
+            throw std::out_of_range{"try to get access to element out of matrix"};
+        return data_[row_order_[i] * width_ + col_order_[j]];
     }
 };
 
