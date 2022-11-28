@@ -77,7 +77,7 @@ public:
         width_ = max_width_;
         data_ = new T[height_ * width_];
         rows_ = new T*[height_];
-        auto act_row = 0;
+        std::size_t act_row = 0;
         for (auto row: twodim_list)
         {
             std::copy(row.begin(), row.end(), data_ + act_row * width_);
