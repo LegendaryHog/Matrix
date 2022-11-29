@@ -206,7 +206,6 @@ public:
             for (auto j = 0; j < width_ - 1; j++)
                 out << rows_[i][j] << ' ';
             out << rows_[i][width_ - 1] << '}';
-            
         }
         out << '}';
         return out;
