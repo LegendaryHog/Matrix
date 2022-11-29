@@ -8,16 +8,16 @@
 
 using namespace Matrix;
 
-using  Matrix = MatrixArithmetic;
-
+template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
+using MatrixT = MatrixArithmetic<T, ArDiv, Cmp>;
 
 TEST(Constructors, by_1_val)
 {
-    Matrix<int> mat1 (1, 1, 1);
-    Matrix<int> mat2 (3, 3, 2);
-    Matrix<int> mat3 (3, 3);
-    Matrix<int> mat4 (1, 1);
-    Matrix<int> mat5;
+    MatrixT<int> mat1 (1, 1, 1);
+    MatrixT<int> mat2 (3, 3, 2);
+    MatrixT<int> mat3 (3, 3);
+    MatrixT<int> mat4 (1, 1);
+    MatrixT<int> mat5;
 
     #ifdef PRINT
     std::cout << "Ctor by 1 val:" << std::endl;
@@ -34,12 +34,12 @@ TEST(Constructors, by_conteiner)
     std::vector<int> vec = {1, 2, 3, 4, 5, 6};
     std::list<int> list = {7, 8, 9, 10, 11, 12};
 
-    Matrix<int> mat1 (2, 3, vec.begin(), vec.end());
-    Matrix<int> mat2 (2, 2, vec.begin(), vec.end());
-    Matrix<int> mat3 (3, 2, vec.begin(), vec.end());
-    Matrix<int> mat4 (2, 3, list.begin(), list.end());
-    Matrix<int> mat5 (2, 2, list.begin(), list.end());
-    Matrix<int> mat6 (4, 4, list.begin(), list.end());
+    MatrixT<int> mat1 (2, 3, vec.begin(), vec.end());
+    MatrixT<int> mat2 (2, 2, vec.begin(), vec.end());
+    MatrixT<int> mat3 (3, 2, vec.begin(), vec.end());
+    MatrixT<int> mat4 (2, 3, list.begin(), list.end());
+    MatrixT<int> mat5 (2, 2, list.begin(), list.end());
+    MatrixT<int> mat6 (4, 4, list.begin(), list.end());
 
     #ifdef PRINT
     std::cout << "Ctor by cont:" << std::endl;
@@ -54,11 +54,11 @@ TEST(Constructors, by_conteiner)
 
 TEST(Constructors, _1x1_by_val_and_one_dim_list)
 {
-    Matrix<int> mat1 {2};
-    Matrix<int> mat2 (3);
-    Matrix<int> mat3 = 4;
-    Matrix<int> mat4 {2, 3, 2};
-    Matrix<int> mat5 = {2, 3, 2};
+    MatrixT<int> mat1 {2};
+    MatrixT<int> mat2 (3);
+    MatrixT<int> mat3 = 4;
+    MatrixT<int> mat4 {2, 3, 2};
+    MatrixT<int> mat5 = {2, 3, 2};
 
     #ifdef PRINT
     std::cout << "Ctor 1x1 by val and by onedim list:" << std::endl;
@@ -72,11 +72,11 @@ TEST(Constructors, _1x1_by_val_and_one_dim_list)
 
 TEST(Constructors, by_two_dim_list)
 {
-    Matrix<int> mat1 {{1, 0}, {0, 1}};
-    Matrix<int> mat2 {{1}, {0, 1}};
-    Matrix<int> mat3 {{1, 2}, {5, 6, 7, 8}, {}};
-    Matrix<int> mat4 {{1, 1, 2}, {}};
-    Matrix<int> mat5 {{1, 1, 2}};
+    MatrixT<int> mat1 {{1, 0}, {0, 1}};
+    MatrixT<int> mat2 {{1}, {0, 1}};
+    MatrixT<int> mat3 {{1, 2}, {5, 6, 7, 8}, {}};
+    MatrixT<int> mat4 {{1, 1, 2}, {}};
+    MatrixT<int> mat5 {{1, 1, 2}};
 
     #ifdef PRINT
     std::cout << "Ctor by twodim list:" << std::endl;
@@ -90,10 +90,10 @@ TEST(Constructors, by_two_dim_list)
 
 TEST(Constructors, copy_ctor_and_copy_assignment)
 {
-    Matrix<int> mat1 {{1}, {0, 1}, {0, 0, 1}};
-    Matrix<int> mat2 {mat1};
-    Matrix<int> mat3 = mat1;
-    Matrix<int> mat4 = mat1;
+    MatrixT<int> mat1 {{1}, {0, 1}, {0, 0, 1}};
+    MatrixT<int> mat2 {mat1};
+    MatrixT<int> mat3 = mat1;
+    MatrixT<int> mat4 = mat1;
     mat4 = mat2;
 
     #ifdef PRINT
@@ -105,16 +105,16 @@ TEST(Constructors, copy_ctor_and_copy_assignment)
     #endif
 }
 
-Matrix<int> ret_tmp()
+MatrixT<int> ret_tmp()
 {
-    return Matrix<int>(2, 2, 1);
+    return MatrixT<int>(2, 2, 1);
 }
 
 TEST(Constructors, move_ctor_and_move_assignment)
 {
-    Matrix<int> mat1 {ret_tmp()};
-    Matrix<int> mat2 (3, 3, 1);
-    Matrix<int> mat3 (2, 1, 3);
+    MatrixT<int> mat1 {ret_tmp()};
+    MatrixT<int> mat2 (3, 3, 1);
+    MatrixT<int> mat3 (2, 1, 3);
     mat3 = std::move(mat2);
 
     #ifdef PRINT
@@ -124,3 +124,8 @@ TEST(Constructors, move_ctor_and_move_assignment)
     #endif
 }
 
+int main()
+{
+    testing::InitGoogleTest();
+    return RUN_ALL_TESTS();
+}
