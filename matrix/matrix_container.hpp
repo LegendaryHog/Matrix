@@ -13,7 +13,7 @@ namespace Matrix
 template<typename T = int>
 class MatrixContainer
 {
-    using std::size_t = size_t;
+    using size_t = std::size_t;
 
     size_t height_ = 0, width_ = 0;
     T* data_ = nullptr;
@@ -244,7 +244,8 @@ public:
         pointer data_ = nullptr;
         size_t i_, j_ = 0;
         size_t width_ = 0;
-        size_t* row_order_ = nullptr, col_order_ = nullptr;
+        size_t* row_order_ = nullptr;
+        size_t* col_order_ = nullptr;
 
     public:
         Iterator(const MatrixContainer& mat, size_t i, size_t j)
@@ -255,7 +256,7 @@ public:
             return data_[row_order_[i_] * width_ + col_order_[j_]]; 
         }
 
-        const reference operator*() const& noexcept
+        reference operator*() & noexcept
         {
             return data_[row_order_[i_] * width_ + col_order_[j_]]; 
         }
