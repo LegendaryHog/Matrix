@@ -55,10 +55,7 @@ public:
     template<std::input_iterator it>
     MatrixContainer(size_type h, size_type w, it begin, it end)
     :height_ {h}, width_ {w}, data_ {new value_type[height_ * width_]}
-    {
-        if (height_ < 0 || width_ < 0)
-            throw std::length_error{"In constructor of matrix: height_ or width_ less null"};
-        
+    {   
         auto i = 0;
         for (auto itr = begin; i < height_ * width_ && itr != end; i++, ++itr)
             data_[i] = *itr;
@@ -209,7 +206,22 @@ private:
             return row_[col_order_in_row_[ind]];
         }
 
-        const_reference operator[](size_type ind) const & noexcept
+        value_type operator[](size_type ind) && noexcept
+        {
+            return row_[col_order_in_row_[ind]];
+        }
+    };
+
+    class ConstProxyRow
+    {
+        const_pointer row_ = nullptr;
+        size_type* col_order_in_row_ = nullptr;
+    public:
+        ConstProxyRow(const MatrixContainer& mat, size_type row_ind)
+        :row_ {mat.data_ + mat.row_order_[row_ind]}, col_order_in_row_ {mat.col_order_}
+        {}
+
+        const_reference operator[](size_type ind) & noexcept
         {
             return row_[col_order_in_row_[ind]];
         }
@@ -226,7 +238,7 @@ public:
         return ProxyRow {*this, ind};
     }
 
-    const ProxyRow operator[](size_type ind) const& noexcept
+    ConstProxyRow operator[](size_type ind) const& noexcept
     {
         return ProxyRow {*this, ind};
     }
