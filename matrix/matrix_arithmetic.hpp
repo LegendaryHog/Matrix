@@ -4,7 +4,7 @@ namespace Matrix
 {
 
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-class MatrixArithmetic: public MatrixContainer<T>
+class MatrixArithmetic final: public MatrixContainer<T> 
 {
     using base       = MatrixContainer<T>; 
     using size_type  = typename std::size_t;
@@ -47,7 +47,7 @@ public:
 //----------------------------=| Swap rows and columns start |=---------------------
     void swap_row(size_type ind1, size_type ind2)
     {
-        if (ind1 >= this->height_ || ind2 >= this->height_)
+        if (ind1 >= this->height() || ind2 >= this->height())
             throw std::out_of_range{"try to swap rows with indexis out of range"};
 
         std::swap(this->row_order_[ind1], this->row_order_[ind2]);
@@ -55,7 +55,7 @@ public:
 
     void swap_col(size_type ind1, size_type ind2)
     {
-        if (ind1 >= this->width_ || ind2 >= this->width_)
+        if (ind1 >= this->width() || ind2 >= this->width())
             throw std::out_of_range{"try to swap columns with indexis out of range"};
 
         std::swap(this->col_order_[ind1], this->col_order_[ind2]);
@@ -67,7 +67,7 @@ private:
     size_type row_with_max_fst(size_type iteration)
     {
         size_type res = iteration;
-        for (size_type i = iteration; i < this->height_; i++)
+        for (size_type i = iteration; i < this->height(); i++)
             if (std::abs(this->to(i, iteration)) > std::abs(this->to(res, iteration)))
                 res = i;
         return res;
@@ -76,7 +76,7 @@ private:
     // method for types with non aritmetic division by Bareiss algorithm Bareiss 
     value_type make_upper_triangular_square(size_type side_of_square) 
     {
-        if (side_of_square > std::min(this->height_, this->width_))
+        if (side_of_square > std::min(this->height(), this->width()))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
 
         value_type div_coef {1};
@@ -106,7 +106,7 @@ private:
     // method for types with arithmetic division by Gauss algorithm
     value_type make_upper_triangular_square(size_type side_of_square) requires (ar_div == true)
     {
-        if (side_of_square > std::min(this->height_, this->width_))
+        if (side_of_square > std::min(this->height(), this->width()))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
     
         value_type sign {1};
@@ -123,7 +123,7 @@ private:
                 for (size_type j = i + 1; j < side_of_square; j++)
                 {
                     value_type coef = this->to(j, i) / this->to(i, i);
-                    for (size_type k = i; k < this->width_; k++)
+                    for (size_type k = i; k < this->width(); k++)
                         this->to(j, k) -= coef * this->to(i, k);
                 }
         }
@@ -135,7 +135,7 @@ private:
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
         {
             auto coef = this->to(i, i);
-            for (size_type j = i; j < this->width_; j++)
+            for (size_type j = i; j < this->width(); j++)
                 this->to(i, j) = this->to(i, j) / coef;
         }
         
@@ -143,7 +143,7 @@ private:
             for (std::size_t j = 0; j < i; j++)
             {
                 auto coef = this->to(j, i);
-                for(size_type k = i; k < this->width_; k++)
+                for(size_type k = i; k < this->width(); k++)
                     this->to(j, k) -= this->to(i, k) * coef;
             }
     }
@@ -151,7 +151,7 @@ private:
     size_type rang_for_upper_triangular() const
     {
         size_type rang_mat  = 0;
-        size_type square_sz = std::min(this->height_, this->width_);
+        size_type square_sz = std::min(this->height(), this->width());
         value_type null_obj {};
         for (size_type i = 0; i < square_sz; i++)
             if (!cmp(this->to(i, i), null_obj))
@@ -165,32 +165,32 @@ public:
     /*size_type rang() const
     {
         MatrixArithmetic cpy {*this};
-        cpy.make_upper_triangular_square(std::min(this->height_, this->width_));
+        cpy.make_upper_triangular_square(std::min(this->height(), this->width()));
         return cpy.rang_for_upper_triangular();
     }*/
 
-    bool is_square() const {return this->height_ == this->width_;}
+    bool is_square() const {return this->height() == this->width();}
 
-    value_type det() const requires (ar_div == true)
+    value_type determinant() const requires (ar_div == true)
     {
         if (!this->is_square())
-            throw std::invalid_argument{"try to get det() of no square matrix"};
+            throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy {*this};
-        value_type sign = cpy.make_upper_triangular_square(this->height_);
+        value_type sign = cpy.make_upper_triangular_square(this->height());
         value_type res {1};
-        for (size_type i = 0; i < this->height_; i++)
+        for (size_type i = 0; i < this->height(); i++)
             res *= cpy.to(i, i);
         return sign * res;
     }
 
-    value_type det() const
+    value_type determinant() const
     {
         if (!this->is_square())
-            throw std::invalid_argument{"try to get det() of no square matrix"};
+            throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy {*this};
-        return cpy.make_upper_triangular_square(this->height_);
+        return cpy.make_upper_triangular_square(this->height());
     }
 
     std::pair<bool, MatrixArithmetic> inverse_pair() const requires (ar_div == true)
@@ -198,25 +198,25 @@ public:
         if (!this->is_square())
             throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
 
-        MatrixArithmetic extended_mat (this->height_, 2 * this->height_);
-        for (size_type i = 0; i < this->height_; i++)
-            for (size_type j = 0; j < this->height_; j++)
+        MatrixArithmetic extended_mat (this->height(), 2 * this->height());
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->height(); j++)
                 extended_mat.to(i, j) = this->to(i, j);
         
-        for (size_type i = 0; i < this->height_; i++)
-            extended_mat.to(i, i + this->height_) = value_type{1};
+        for (size_type i = 0; i < this->height(); i++)
+            extended_mat.to(i, i + this->height()) = value_type{1};
 
-        extended_mat.make_upper_triangular_square(extended_mat.height_);
+        extended_mat.make_upper_triangular_square(extended_mat.height());
 
-        if (extended_mat.rang_for_upper_triangular() != this->height_)
+        if (extended_mat.rang_for_upper_triangular() != this->height())
             return {false, MatrixArithmetic{*this}};
 
-        extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height_);
+        extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height());
         
-        MatrixArithmetic res (this->height_, this->height_);
-        for (size_type i = 0; i < this->height_; i++)
-            for (size_type j = 0; j < this->height_; j++)
-                res.to(i, j) = extended_mat.to(i, j + this->height_);
+        MatrixArithmetic res (this->height(), this->height());
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->height(); j++)
+                res.to(i, j) = extended_mat.to(i, j + this->height());
         
         return {true, res};
     }
@@ -225,7 +225,7 @@ public:
     {
         auto res_pair = inverse_pair();
         if (!res_pair.first)
-            throw std::invalid_argument{"try to get inverse matrix for matrix with det equal to zero"};
+            throw std::invalid_argument{"try to get inverse matrix for matrix with determinant equal to zero"};
 
         return res_pair.second;
     }
@@ -235,8 +235,8 @@ public:
         if (!this->is_square())
             throw std::invalid_argument{"try to transpos no square matrix"};
 
-        for (size_type i = 0; i < this->height_; i++)
-            for (size_type j = i; j < this->width_; j++)
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = i; j < this->width(); j++)
                 std::swap(this->to(i, j), this->to(j, i));
 
         return *this;
@@ -252,14 +252,14 @@ public:
 //----------------------------=| Compare start |=-----------------------------------
     bool equal_to(const MatrixArithmetic& rhs) const
     {
-        if (this->height_ != rhs.height_ || this->width_ != rhs.width_)
+        if (this->height() != rhs.height() || this->width() != rhs.width())
             return false;
 
         if (this->data_ == rhs.data_)
             return true;
 
-        for (size_t i = 0; i < this->height_; i++)
-            for (size_t j = 0; j < this->width_; j++)
+        for (size_t i = 0; i < this->height(); i++)
+            for (size_t j = 0; j < this->width(); j++)
                 if (!cmp(this->to(i, j), rhs.to(i, j)))
                     return false;                  
         return true;
@@ -269,11 +269,11 @@ public:
 //----------------------------=| Basic arithmetic start |=--------------------------
     MatrixArithmetic& operator+=(const MatrixArithmetic& rhs)
     {
-        if (this->height_ != rhs.height_ || this->width_ != rhs.width_)
-            throw std::invalid_argument("Try to add matrixes with different height_ * width_");
+        if (this->height() != rhs.height() || this->width() != rhs.width())
+            throw std::invalid_argument("Try to add matrixes with different height() * width()");
 
-        for (std::size_t i = 0; i < this->height_; i++)
-            for (std::size_t j = 0; j < this->width_; j++)
+        for (std::size_t i = 0; i < this->height(); i++)
+            for (std::size_t j = 0; j < this->width(); j++)
                 this->to(i, j) += rhs.to(i, j);
 
         return *this;
@@ -281,11 +281,11 @@ public:
 
     MatrixArithmetic& operator-=(const MatrixArithmetic& rhs)
     {
-        if (this->height_ != rhs.height_ || this->width_ != rhs.width_)
-            throw std::invalid_argument("Try to sub matrixes with different height_ * width_");
+        if (this->height() != rhs.height() || this->width() != rhs.width())
+            throw std::invalid_argument("Try to sub matrixes with different height() * width()");
 
-        for (std::size_t i = 0; i < this->height_; i++)
-            for (std::size_t j = 0; j < this->width_; j++)
+        for (std::size_t i = 0; i < this->height(); i++)
+            for (std::size_t j = 0; j < this->width(); j++)
                 this->to(i, j) -= rhs.to(i, j);
 
         return *this;
@@ -293,10 +293,10 @@ public:
 
     MatrixArithmetic operator-() const
     {
-        MatrixArithmetic res (this->height_, this->width_);
+        MatrixArithmetic res (this->height(), this->width());
 
-        for (std::size_t i = 0; i < this->height_; i++)
-            for (std::size_t j = 0; j < this->width_; j++)
+        for (std::size_t i = 0; i < this->height(); i++)
+            for (std::size_t j = 0; j < this->width(); j++)
                 res.to(i, j) = -this->to(i, j);
 
         return res;
@@ -304,14 +304,14 @@ public:
 
     MatrixArithmetic& operator*=(const T& rhs)
     {
-        for (std::size_t i = 0; i < this->height_ * this->width_; i++)
+        for (std::size_t i = 0; i < this->height() * this->width(); i++)
             this->data_[i] *= rhs;
         return *this;
     }
 
     MatrixArithmetic& operator/=(const T& rhs)
     {
-        for (std::size_t i = 0; i < this->height_ * this->width_; i++)
+        for (std::size_t i = 0; i < this->height() * this->width(); i++)
             this->data_[i] /= rhs;
         return *this;
     }
@@ -334,8 +334,8 @@ public:
     {
         MatrixArithmetic result {square(sz)};
         auto itr = begin;
-        for (auto i = 0; i < sz && itr != end; ++itr, i++)
-            result.data_[i * sz + i] = *itr;
+        for (size_type i = 0; i < sz && itr != end; ++itr, i++)
+            result.to(i, i) = *itr;
         return result;
     }
 
@@ -347,20 +347,25 @@ public:
         return diag(sz, begin, end);
     }
 
-    static MatrixArithmetic diag(std::size_t sz, T val = T{})
+    static MatrixArithmetic diag(size_type sz, T val = T{})
     {
         MatrixArithmetic result {square(sz)};
-        for (auto i = 0; i < sz; i++)
-            result.data_[i * sz + i] = val;
+        for (size_type i = 0; i < sz; i++)
+            result.to(i, i) = val;
         return result;
+    }
+
+    static MatrixArithmetic eye(size_type sz)
+    {
+        return diag(sz, value_type{1});
     }
 //----------------------------=| Specific static ctors end |=-----------------------
 };
 
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-T det(const MatrixArithmetic<T, Ardiv, Cmp>& mat)
+T determinant(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
 {
-    return mat.det();
+    return mat.determinant();
 }
 
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
@@ -372,10 +377,10 @@ MatrixArithmetic<T, ArDiv, Cmp> inverse(const MatrixArithmetic<T, ArDiv, Cmp>& m
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
 MatrixArithmetic<T, ArDiv, Cmp> product(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
 {
-    if (lhs.width_ != rhs.height_)
-        throw std::invalid_argument{"in product: lhs.width_ != rhs.height_"};
+    if (lhs.width() != rhs.height())
+        throw std::invalid_argument{"in product: lhs.width() != rhs.height()"};
 
-    MatrixArithmetic<T, ArDiv, Cmp> res (lhs.height_, rhs.width_);
+    MatrixArithmetic<T, ArDiv, Cmp> res (lhs.height(), rhs.width());
 
     for (std::size_t i = 0; i < lhs.height(); i++)
         for (std::size_t j = 0; j < rhs.width(); j++)

@@ -13,6 +13,7 @@ namespace Matrix
 template<typename T = int>
 class MatrixContainer
 {
+
     using size_type         = typename std::size_t;
     using iterator_category = typename std::random_access_iterator_tag;
     using difference_type   = typename std::ptrdiff_t;
@@ -21,7 +22,7 @@ class MatrixContainer
     using const_pointer     = const T*;
     using reference         = T&;
     using const_reference   = const T&;
-
+protected:
     size_type height_ = 0, width_ = 0;
     pointer data_ = nullptr;
 
@@ -73,7 +74,7 @@ public:
     }
 
     MatrixContainer(std::initializer_list<std::initializer_list<value_type>> twodim_list)
-    :height_ {twodim_list.size()}
+    :height_ {twodim_list.size()}, row_order_ {nullptr}, col_order_ {nullptr}
     {
         if (height_ == 0)
             throw std::logic_error{"Never know why - Ozzy Osbourne"};
@@ -84,6 +85,10 @@ public:
                 max_width_ = row.size();
 
         width_ = max_width_;
+
+        row_order_ = init_row_order();
+        col_order_ = init_col_order();
+
         data_ = new value_type[height_ * width_];
         size_type act_row = 0;
         for (auto row: twodim_list)
@@ -195,10 +200,10 @@ private:
     class ProxyRow
     {
         pointer row_ = nullptr;
-        size_type* col_order_in_row_ = nullptr;
+        const size_type* col_order_in_row_ = nullptr;
     public:
         ProxyRow(const MatrixContainer& mat, size_type row_ind)
-        :row_ {mat.data_ + mat.row_order_[row_ind]}, col_order_in_row_ {mat.col_order_}
+        :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
         {}
 
         reference operator[](size_type ind) & noexcept
@@ -218,7 +223,7 @@ private:
         size_type* col_order_in_row_ = nullptr;
     public:
         ConstProxyRow(const MatrixContainer& mat, size_type row_ind)
-        :row_ {mat.data_ + mat.row_order_[row_ind]}, col_order_in_row_ {mat.col_order_}
+        :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
         {}
 
         const_reference operator[](size_type ind) & noexcept
@@ -240,7 +245,7 @@ public:
 
     ConstProxyRow operator[](size_type ind) const& noexcept
     {
-        return ProxyRow {*this, ind};
+        return ConstProxyRow {*this, ind};
     }
 
     ProxyRow operator[](size_type ind) && noexcept
