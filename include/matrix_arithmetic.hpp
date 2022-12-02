@@ -384,6 +384,18 @@ T determinant(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
 }
 
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
+std::pair<bool, MatrixArithmetic<T, ArDiv, Cmp>> inverse_pair(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
+{
+    return mat.inverse_pair();
+}
+
+template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, ArDiv, Cmp> transpos(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
+{
+    return mat.transpos();
+}
+
+template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
 MatrixArithmetic<T, ArDiv, Cmp> inverse(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
 {
     return mat.inverse();
