@@ -6,7 +6,7 @@
 
 #include "matrix_arithmetic.hpp"
 
-#define PRINT
+//#define PRINT
 
 using namespace Matrix;
 

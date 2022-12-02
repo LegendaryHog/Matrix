@@ -321,7 +321,7 @@ public:
 
         friend bool operator== (const Iterator& lhs, const Iterator& rhs)
         {
-            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ && rhs.j_;
+            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ == rhs.j_;
         }
 
         friend bool operator!= (const Iterator& lhs, const Iterator& rhs)
@@ -398,7 +398,7 @@ public:
 
         friend bool operator== (const ConstIterator& lhs, const ConstIterator& rhs)
         {
-            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ && rhs.j_;
+            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ == rhs.j_;
         }
 
         friend bool operator!= (const ConstIterator& lhs, const ConstIterator& rhs)

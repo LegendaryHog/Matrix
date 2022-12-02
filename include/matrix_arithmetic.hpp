@@ -224,7 +224,7 @@ public:
         extended_mat.make_upper_triangular_square(extended_mat.height());
 
         if (extended_mat.rang_for_upper_triangular() != this->height())
-            return {false, MatrixArithmetic{*this}};
+            return {false, MatrixArithmetic{value_type{0}}};
 
         extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height());
         
@@ -319,15 +319,15 @@ public:
 
     MatrixArithmetic& operator*=(const T& rhs)
     {
-        for (std::size_t i = 0; i < this->height() * this->width(); i++)
-            this->data_[i] *= rhs;
+        for (auto& elem: *this)
+            elem *= rhs;
         return *this;
     }
 
     MatrixArithmetic& operator/=(const T& rhs)
     {
-        for (std::size_t i = 0; i < this->height() * this->width(); i++)
-            this->data_[i] /= rhs;
+        for (auto& elem: *this)
+            elem /= rhs;
         return *this;
     }
 //----------------------------=| Basic arithmetic end |=----------------------------
