@@ -9,9 +9,13 @@ endif()
 find_package(GTest REQUIRED)
 enable_testing()
 
+include_directories(./include)
+
 set(CMAKE_CXX_STANDARD          20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS        OFF)
 
 add_subdirectory(unit_tests)
-add_subdirectory(matrix)
+
+aux_source_directory(./src SRC_LIST)
+add_executable(matrix ${SRC_LIST})

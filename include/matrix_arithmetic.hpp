@@ -37,6 +37,23 @@ public:
     {}
 //----------------------------=| Ctors end |=---------------------------------------
 
+//----------------------------=| Types start |=-------------------------------------
+    bool is_row()    const {return this->height() == 1;}
+    bool is_column() const {return this->width() == 1;}
+    bool is_scalar() const {return this->height() == 1 && this->width() == 1;}
+    bool is_square() const {return this->height() == this->width();}
+//----------------------------=| Types end |=---------------------------------------
+
+//------------------------=| Static cast start |=-----------------------------------
+    operator value_type() const
+    {
+        if (!is_scalar())
+            throw std::invalid_argument{"Try to cast MatrixArithmetic in value_type, but matrix isnt scalar"};
+        return this->to(0, 0);
+    }
+//------------------------=| Static cast end |=-------------------------------------
+
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++                                                                         
  *----------------------------------------------------------------------------*
  *      ________________________________________________________________      *
@@ -169,8 +186,6 @@ public:
         return cpy.rang_for_upper_triangular();
     }*/
 
-    bool is_square() const {return this->height() == this->width();}
-
     value_type determinant() const requires (ar_div == true)
     {
         if (!this->is_square())
@@ -270,7 +285,7 @@ public:
     MatrixArithmetic& operator+=(const MatrixArithmetic& rhs)
     {
         if (this->height() != rhs.height() || this->width() != rhs.width())
-            throw std::invalid_argument("Try to add matrixes with different height() * width()");
+            throw std::invalid_argument{"Try to add matrixes with different height() * width()"};
 
         for (std::size_t i = 0; i < this->height(); i++)
             for (std::size_t j = 0; j < this->width(); j++)
@@ -282,7 +297,7 @@ public:
     MatrixArithmetic& operator-=(const MatrixArithmetic& rhs)
     {
         if (this->height() != rhs.height() || this->width() != rhs.width())
-            throw std::invalid_argument("Try to sub matrixes with different height() * width()");
+            throw std::invalid_argument{"Try to sub matrixes with different height() * width()"};
 
         for (std::size_t i = 0; i < this->height(); i++)
             for (std::size_t j = 0; j < this->width(); j++)
@@ -377,6 +392,22 @@ MatrixArithmetic<T, ArDiv, Cmp> inverse(const MatrixArithmetic<T, ArDiv, Cmp>& m
 template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
 MatrixArithmetic<T, ArDiv, Cmp> product(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
 {
+    if (lhs.is_scalar())
+    {
+        MatrixArithmetic res {rhs};
+        T& scalar = lhs;
+        for (auto elem: res)
+            elem *= scalar;
+        return res;
+    }
+    if (rhs.is_scalar())
+    {
+        MatrixArithmetic res {lhs};
+        T& scalar = rhs;
+        for (auto elem: res)
+            elem *= scalar;
+        return res;
+    }
     if (lhs.width() != rhs.height())
         throw std::invalid_argument{"in product: lhs.width() != rhs.height()"};
 

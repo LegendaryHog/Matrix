@@ -249,10 +249,10 @@ TEST(Methods, det_for_other)
     MatrixArithmetic mat7 = {{0, 12},{2, 0}};
     MatrixArithmetic mat8 = {{12, 3, 0, 0}, {3, -5}, {1, -9}, {3, -7}};
     MatrixArithmetic mat9 = {{1, 2, 0, 0, 3},
-                     {3, -4, 0, 0, 3},
-                     {2, -8, 0, 0, 9},
-                     {15, -17, 0, 0, 5}, 
-                     {32, 31, 0, 0, 1}};
+                             {3, -4, 0, 0, 3},
+                             {2, -8, 0, 0, 9},
+                             {15, -17, 0, 0, 5}, 
+                             {32, 31, 0, 0, 1}};
 
     EXPECT_EQ(mat1.determinant(), 1);
     EXPECT_EQ(mat2.determinant(), 0);
@@ -347,6 +347,18 @@ TEST(Operators, operator_div)
     MatrixArithmetic mat      = {{24, -10, 2}, {6, 18, -10}};
 
     EXPECT_EQ(half_mat, mat / 2);
+}
+
+TEST(Operators, cast_to_scalar)
+{
+    MatrixArithmetic scalar_mat {4};
+    MatrixArithmetic mat (2, 2, 1);
+    auto value_int = 5;
+
+    EXPECT_EQ(scalar_mat + value_int, 9);
+    EXPECT_EQ(value_int + scalar_mat, 9);
+    EXPECT_THROW(value_int = mat + 5, std::invalid_argument);
+    EXPECT_THROW(value_int = 5 + mat, std::invalid_argument);
 }
 
 

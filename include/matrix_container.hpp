@@ -414,7 +414,6 @@ public:
 //------------------------=| Iterators end |=--------------------------------
 };
 
-
 template<typename value_type = int>
 std::ostream& dump(std::ostream& os, const MatrixContainer<value_type>& mat)
 {
