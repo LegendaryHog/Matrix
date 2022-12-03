@@ -3,14 +3,14 @@
 namespace Matrix
 {
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
 class MatrixArithmetic final: public MatrixContainer<T> 
 {
     using base       = MatrixContainer<T>; 
     using size_type  = typename std::size_t;
     using value_type = T;
     
-    static constexpr bool ar_div = ArDiv;
+    static constexpr bool is_div_arithmetical = IsDivArritm;
     Cmp cmp {};
 
 public:
@@ -80,7 +80,7 @@ public:
 //----------------------------=| Swap rows and columns end |=-----------------------
 
 //----------------------------=| Algorithm fucntions start |=-----------------------
-private:
+protected:
     size_type row_with_max_fst(size_type iteration)
     {
         size_type res = iteration;
@@ -121,7 +121,7 @@ private:
     }
     
     // method for types with arithmetic division by Gauss algorithm
-    value_type make_upper_triangular_square(size_type side_of_square) requires (ar_div == true)
+    value_type make_upper_triangular_square(size_type side_of_square) requires (is_div_arithmetical == true)
     {
         if (side_of_square > std::min(this->height(), this->width()))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
@@ -147,13 +147,13 @@ private:
         return sign;
     }
 
-    void make_eye_square_from_upper_triangular_square(size_type side_of_square) requires (ar_div == true)
+    void make_eye_square_from_upper_triangular_square(size_type side_of_square) requires (is_div_arithmetical == true)
     {
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
         {
             auto coef = this->to(i, i);
             for (size_type j = i; j < this->width(); j++)
-                this->to(i, j) = this->to(i, j) / coef;
+                this->to(i, j) /= coef;
         }
         
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
@@ -165,38 +165,25 @@ private:
             }
     }
 
-    size_type rang_for_upper_triangular() const
+    value_type determinant_for_upper_triangular() const requires (is_div_arithmetical == true)
     {
-        size_type rang_mat  = 0;
-        size_type square_sz = std::min(this->height(), this->width());
-        value_type null_obj {};
-        for (size_type i = 0; i < square_sz; i++)
-            if (!cmp(this->to(i, i), null_obj))
-                rang_mat++;
-        return rang_mat;      
+        value_type res {1};
+        for (size_type i = 0; i < this->height(); i++)
+            res *= to(i, i);
+        return res;
     }
 //----------------------------=| Algorithm fucntions end |=-------------------------
 
 //----------------------------=| Public methods start |=----------------------------
 public:
-    /*size_type rang() const
-    {
-        MatrixArithmetic cpy {*this};
-        cpy.make_upper_triangular_square(std::min(this->height(), this->width()));
-        return cpy.rang_for_upper_triangular();
-    }*/
-
-    value_type determinant() const requires (ar_div == true)
+    value_type determinant() const requires (is_div_arithmetical == true)
     {
         if (!this->is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy {*this};
         value_type sign = cpy.make_upper_triangular_square(this->height());
-        value_type res {1};
-        for (size_type i = 0; i < this->height(); i++)
-            res *= cpy.to(i, i);
-        return sign * res;
+        return sign * cpy.determinant_for_upper_triangular();
     }
 
     value_type determinant() const
@@ -208,7 +195,7 @@ public:
         return cpy.make_upper_triangular_square(this->height());
     }
 
-    std::pair<bool, MatrixArithmetic> inverse_pair() const requires (ar_div == true)
+    std::pair<bool, MatrixArithmetic> inverse_pair() const requires (is_div_arithmetical == true)
     {
         if (!this->is_square())
             throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
@@ -223,7 +210,7 @@ public:
 
         extended_mat.make_upper_triangular_square(extended_mat.height());
 
-        if (extended_mat.rang_for_upper_triangular() != this->height())
+        if (extended_mat.determinant_for_upper_triangular() == value_type{})
             return {false, MatrixArithmetic{value_type{0}}};
 
         extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height());
@@ -236,7 +223,7 @@ public:
         return {true, res};
     }
 
-    MatrixArithmetic inverse() const requires (ar_div == true)
+    MatrixArithmetic inverse() const requires (is_div_arithmetical == true)
     {
         auto res_pair = inverse_pair();
         if (!res_pair.first)
@@ -245,22 +232,13 @@ public:
         return res_pair.second;
     }
 
-    MatrixArithmetic& transpos_it()
-    {
-        if (!this->is_square())
-            throw std::invalid_argument{"try to transpos no square matrix"};
-
-        for (size_type i = 0; i < this->height(); i++)
-            for (size_type j = i; j < this->width(); j++)
-                std::swap(this->to(i, j), this->to(j, i));
-
-        return *this;
-    }
-
     MatrixArithmetic transpos() const
     {
-        MatrixArithmetic res {*this};
-        return res.transpos_it();
+        MatrixArithmetic res {this->width(), this->height()};
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->width(); j++)
+                res.to(j, i) = this->to(i, j);
+        return res;
     }
 //----------------------------=| Public methods end |=------------------------------
 
@@ -377,32 +355,32 @@ public:
 //----------------------------=| Specific static ctors end |=-----------------------
 };
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-T determinant(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+T determinant(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
 {
     return mat.determinant();
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-std::pair<bool, MatrixArithmetic<T, ArDiv, Cmp>> inverse_pair(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+std::pair<bool, MatrixArithmetic<T, IsDivArritm, Cmp>> inverse_pair(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
 {
     return mat.inverse_pair();
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> transpos(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> transpos(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
 {
     return mat.transpos();
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> inverse(const MatrixArithmetic<T, ArDiv, Cmp>& mat)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> inverse(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
 {
     return mat.inverse();
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> product(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> product(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
 {
     if (lhs.is_scalar())
     {
@@ -423,7 +401,7 @@ MatrixArithmetic<T, ArDiv, Cmp> product(const MatrixArithmetic<T, ArDiv, Cmp>& l
     if (lhs.width() != rhs.height())
         throw std::invalid_argument{"in product: lhs.width() != rhs.height()"};
 
-    MatrixArithmetic<T, ArDiv, Cmp> res (lhs.height(), rhs.width());
+    MatrixArithmetic<T, IsDivArritm, Cmp> res (lhs.height(), rhs.width());
 
     for (std::size_t i = 0; i < lhs.height(); i++)
         for (std::size_t j = 0; j < rhs.width(); j++)
@@ -433,49 +411,49 @@ MatrixArithmetic<T, ArDiv, Cmp> product(const MatrixArithmetic<T, ArDiv, Cmp>& l
     return res; 
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-bool operator==(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+bool operator==(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
 {
     return lhs.equal_to(rhs);
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-bool operator!=(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+bool operator!=(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
 {
     return !lhs.equal_to(rhs);
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> operator+(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> operator+(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
 {
-    MatrixArithmetic<T, ArDiv, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy += rhs);
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> operator-(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> operator-(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
 {
-    MatrixArithmetic<T, ArDiv, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy -= rhs);
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> operator*(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const T& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> operator*(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, ArDiv, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy *= rhs);
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> operator*(const T& lhs, const MatrixArithmetic<T, ArDiv, Cmp>& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> operator*(const T& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
 {
     return rhs * lhs;
 }
 
-template<typename T = int, bool ArDiv = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, ArDiv, Cmp> operator/(const MatrixArithmetic<T, ArDiv, Cmp>& lhs, const T& rhs)
+template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+MatrixArithmetic<T, IsDivArritm, Cmp> operator/(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, ArDiv, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy /= rhs);
 }
 

@@ -23,9 +23,10 @@ class MatrixContainer
     using reference         = T&;
     using const_reference   = const T&;
 protected:
-    size_type height_ = 0, width_ = 0;
     pointer data_ = nullptr;
-
+private:
+    size_type height_ = 0, width_ = 0;
+    
     size_type* init_row_order() const
     {
         size_type* row_order = new size_type[height_];
