@@ -4,6 +4,13 @@ namespace Matrix
 {
 
 template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+/*
+ *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * IsDivArithm - is division arritmetical correct.
+ * If for all a, b, c of type T: b != null_obj -> (a / b == c) == (b * c == a)
+ * then I say that division operation for T defined arrithmetical correct
+ *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
 class MatrixArithmetic final: public MatrixContainer<T> 
 {
     using base       = MatrixContainer<T>; 
