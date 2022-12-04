@@ -218,12 +218,15 @@ TEST(Methods, det_for_double)
                                      {23, 0, -11},
                                      {2, 0, 2}};
 
+    MatrixArithmetic<double, true, DblCmp> mat7 = {{0.0, 1832.25, -2427.0}, {0.0, -945.0, 1242.0}, {0.0, 1911.0, -2523.0}};
+
     EXPECT_TRUE(dbl_cmp(mat1.determinant(), 31098.4));
     EXPECT_TRUE(dbl_cmp(mat2.determinant(), -57462.22));
     EXPECT_TRUE(dbl_cmp(mat3.determinant(), 1.0));
     EXPECT_TRUE(dbl_cmp(mat4.determinant(), 0.0));
     EXPECT_TRUE(dbl_cmp(mat5.determinant(), 480076249541075524.76));
     EXPECT_TRUE(dbl_cmp(mat6.determinant(), 0.0));
+    EXPECT_TRUE(dbl_cmp(mat7.determinant(), -0.0));
 }
 
 TEST(Methods, inverse)

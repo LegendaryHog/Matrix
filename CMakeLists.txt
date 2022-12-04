@@ -16,6 +16,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS        OFF)
 
 add_subdirectory(unit_tests)
-
-aux_source_directory(./src SRC_LIST)
-add_executable(matrix ${SRC_LIST})
+add_subdirectory(task)

@@ -3,12 +3,23 @@
 namespace Matrix
 {
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
+template<typename T>
+concept is_abs_available = requires(const T& arg) {std::abs(arg);};
+
+
+template<typename T>
+struct DefaultAbs__
+{
+    auto operator()(const T& arg) const requires is_abs_available<T> {return std::abs(arg);}
+    int operator()(const T& arg) const {return 0;};
+};
+
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
 /*
  *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * IsDivArithm - is division arritmetical correct.
- * If for all a, b, c of type T: b != null_obj -> (a / b == c) == (b * c == a)
- * then I say that division operation for T defined arrithmetical correct
+ * IsDivArithm - is division arritmetical correct.                               |
+ * If for all a, b, c of type T: b != null_obj -> (a / b == c) == (b * c == a)   |
+ * then I say that division operation for T defined arrithmetical correct        |
  *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 class MatrixArithmetic final: public MatrixContainer<T> 
@@ -17,11 +28,12 @@ class MatrixArithmetic final: public MatrixContainer<T>
     using size_type  = typename std::size_t;
     using value_type = T;
     
-    static constexpr bool is_div_arithmetical = IsDivArritm;
+    static constexpr bool is_div_arithmetical = IsDivArithm;
     Cmp cmp {};
+    Abs abs {};
 
 public:
-//----------------------------=| Ctors start |=-------------------------------
+//--------------------------------=| Ctors start |=-----------------------------------------------------
     MatrixArithmetic(size_type h, size_type w, value_type val = value_type{})
     :base::MatrixContainer(h, w, val)
     {}
@@ -42,24 +54,23 @@ public:
     MatrixArithmetic(std::initializer_list<std::initializer_list<value_type>> twodim_list)
     :base::MatrixContainer(twodim_list)
     {}
-//----------------------------=| Ctors end |=---------------------------------------
+//--------------------------------=| Ctors end |=-------------------------------------------------------
 
-//----------------------------=| Types start |=-------------------------------------
+//--------------------------------=| Types start |=-----------------------------------------------------
     bool is_row()    const {return this->height() == 1;}
     bool is_column() const {return this->width() == 1;}
     bool is_scalar() const {return this->height() == 1 && this->width() == 1;}
     bool is_square() const {return this->height() == this->width();}
-//----------------------------=| Types end |=---------------------------------------
+//--------------------------------=| Types end |=-------------------------------------------------------
 
-//------------------------=| Static cast start |=-----------------------------------
+//--------------------------------=| Static cast start |=-----------------------------------------------
     operator value_type() const
     {
         if (!is_scalar())
             throw std::invalid_argument{"Try to cast MatrixArithmetic in value_type, but matrix isnt scalar"};
         return this->to(0, 0);
     }
-//------------------------=| Static cast end |=-------------------------------------
-
+//--------------------------------=| Static cast end |=-------------------------------------------------
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++                                                                         
  *----------------------------------------------------------------------------*
@@ -68,7 +79,7 @@ public:
  *      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      *
  *----------------------------------------------------------------------------*
  */                               
-//----------------------------=| Swap rows and columns start |=---------------------
+//--------------------------------=| Swap rows and columns start |=------------------------------------
     void swap_row(size_type ind1, size_type ind2)
     {
         if (ind1 >= this->height() || ind2 >= this->height())
@@ -84,15 +95,15 @@ public:
 
         std::swap(this->col_order_[ind1], this->col_order_[ind2]);
     }
-//----------------------------=| Swap rows and columns end |=-----------------------
+//--------------------------------=| Swap rows and columns end |=--------------------------------------
 
-//----------------------------=| Algorithm fucntions start |=-----------------------
+//--------------------------------=| Algorithm fucntions start |=---------------------------------------
 protected:
     size_type row_with_max_fst(size_type iteration)
     {
         size_type res = iteration;
         for (size_type i = iteration; i < this->height(); i++)
-            if (std::abs(this->to(i, iteration)) > std::abs(this->to(res, iteration)))
+            if (abs(this->to(i, iteration)) > abs(this->to(res, iteration)))
                 res = i;
         return res;
     }
@@ -176,12 +187,12 @@ protected:
     {
         value_type res {1};
         for (size_type i = 0; i < this->height(); i++)
-            res *= to(i, i);
+            res *= this->to(i, i);
         return res;
     }
-//----------------------------=| Algorithm fucntions end |=-------------------------
+//--------------------------------=| Algorithm fucntions end |=-----------------------------------------
 
-//----------------------------=| Public methods start |=----------------------------
+//--------------------------------=| Public methods start |=--------------------------------------------
 public:
     value_type determinant() const requires (is_div_arithmetical == true)
     {
@@ -247,15 +258,15 @@ public:
                 res.to(j, i) = this->to(i, j);
         return res;
     }
-//----------------------------=| Public methods end |=------------------------------
+//--------------------------------=| Public methods end |=----------------------------------------------
 
-//----------------------------=| Compare start |=-----------------------------------
+//--------------------------------=| Compare start |=---------------------------------------------------
     bool equal_to(const MatrixArithmetic& rhs) const
     {
         if (this->height() != rhs.height() || this->width() != rhs.width())
             return false;
 
-        if (this->data_ == rhs.data_)
+        if (this->cbegin() == rhs.cbegin())
             return true;
 
         for (size_t i = 0; i < this->height(); i++)
@@ -264,9 +275,9 @@ public:
                     return false;                  
         return true;
     }
-//----------------------------=| Compare end |=-------------------------------------
+//--------------------------------=| Compare end |=-----------------------------------------------------
 
-//----------------------------=| Basic arithmetic start |=--------------------------
+//--------------------------------=| Basic arithmetic start |=------------------------------------------
     MatrixArithmetic& operator+=(const MatrixArithmetic& rhs)
     {
         if (this->height() != rhs.height() || this->width() != rhs.width())
@@ -315,9 +326,9 @@ public:
             elem /= rhs;
         return *this;
     }
-//----------------------------=| Basic arithmetic end |=----------------------------
+//--------------------------------=| Basic arithmetic end |=-------------------------------------------
 
-//----------------------------=| Specific static ctors start |=---------------------
+//--------------------------------=| Specific static ctors start |=-------------------------------------
     static MatrixArithmetic square(size_type sz, value_type val = value_type{})
     {
         return MatrixArithmetic(sz, sz, val);
@@ -359,35 +370,39 @@ public:
     {
         return diag(sz, value_type{1});
     }
-//----------------------------=| Specific static ctors end |=-----------------------
+//--------------------------------=| Specific static ctors end |=---------------------------------------
 };
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-T determinant(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
+//--------------------------------=| Wrappers arounf methods start |=-----------------------------------
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+T determinant(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
 {
     return mat.determinant();
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-std::pair<bool, MatrixArithmetic<T, IsDivArritm, Cmp>> inverse_pair(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+std::pair<bool, MatrixArithmetic<T, IsDivArithm, Cmp>> inverse_pair(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
 {
     return mat.inverse_pair();
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> transpos(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
-{
-    return mat.transpos();
-}
-
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> inverse(const MatrixArithmetic<T, IsDivArritm, Cmp>& mat)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> inverse(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
 {
     return mat.inverse();
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> product(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
+
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> transpos(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
+{
+    return mat.transpos();
+}
+//--------------------------------=| Wrappers arounf methods end |=-------------------------------------
+
+//--------------------------------=| Arrithmetical operators start |=-----------------------------------
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> product(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
 {
     if (lhs.is_scalar())
     {
@@ -408,7 +423,7 @@ MatrixArithmetic<T, IsDivArritm, Cmp> product(const MatrixArithmetic<T, IsDivArr
     if (lhs.width() != rhs.height())
         throw std::invalid_argument{"in product: lhs.width() != rhs.height()"};
 
-    MatrixArithmetic<T, IsDivArritm, Cmp> res (lhs.height(), rhs.width());
+    MatrixArithmetic<T, IsDivArithm, Cmp> res (lhs.height(), rhs.width());
 
     for (std::size_t i = 0; i < lhs.height(); i++)
         for (std::size_t j = 0; j < rhs.width(); j++)
@@ -418,50 +433,51 @@ MatrixArithmetic<T, IsDivArritm, Cmp> product(const MatrixArithmetic<T, IsDivArr
     return res; 
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-bool operator==(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+bool operator==(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
 {
     return lhs.equal_to(rhs);
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-bool operator!=(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+bool operator!=(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
 {
     return !lhs.equal_to(rhs);
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> operator+(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> operator+(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
 {
-    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy += rhs);
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> operator-(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> operator-(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
 {
-    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy -= rhs);
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> operator*(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const T& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> operator*(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy *= rhs);
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> operator*(const T& lhs, const MatrixArithmetic<T, IsDivArritm, Cmp>& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> operator*(const T& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
 {
     return rhs * lhs;
 }
 
-template<typename T = int, bool IsDivArritm = false, class Cmp = std::equal_to<T>>
-MatrixArithmetic<T, IsDivArritm, Cmp> operator/(const MatrixArithmetic<T, IsDivArritm, Cmp>& lhs, const T& rhs)
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+MatrixArithmetic<T, IsDivArithm, Cmp> operator/(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, IsDivArritm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
     return (lhs_cpy /= rhs);
 }
+//--------------------------------=| Arrithmetical operators end |=-------------------------------------
 
 } //Matrix
