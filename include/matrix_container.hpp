@@ -25,20 +25,29 @@ class MatrixContainer
 
 private:
     size_type height_ = 0, width_ = 0;
-    pointer data_ = nullptr;    
+    pointer data_ = nullptr;
+
     size_type* init_row_order() const
     {
-        size_type* row_order = new size_type[height_];
-        for (size_type i = 0; i < height_; i++)
-            row_order[i] = i;
-        return row_order;
+        try 
+        {
+            size_type* row_order = new size_type[height_];
+            for (size_type i = 0; i < height_; i++)
+                row_order[i] = i;
+            return row_order;
+        }
+        catch (std::bad_alloc) {throw;}
     }
     size_type* init_col_order() const
     {
-        size_type* col_order = new size_type[width_];
-        for (size_type i = 0; i < width_; i++)
-            col_order[i] = i;
-        return col_order;
+        try
+        {
+            size_type* col_order = new size_type[width_];
+            for (size_type i = 0; i < width_; i++)
+                col_order[i] = i;
+            return col_order;
+        }
+        catch(std::bad_alloc) {throw;}
     }
 
 protected:
@@ -74,23 +83,21 @@ public:
         std::copy(onedim_list.begin(), onedim_list.end(), data_);
     }
 
-    MatrixContainer(std::initializer_list<std::initializer_list<value_type>> twodim_list)
-    :height_ {twodim_list.size()}, row_order_ {nullptr}, col_order_ {nullptr}
+private:
+    // sub function
+    size_type calc_width(std::initializer_list<std::initializer_list<value_type>>& twodim_list)
     {
-        if (height_ == 0)
-            throw std::logic_error{"Never know why - Ozzy Osbourne"};
-        
-        size_type max_width_ = 0;
+        size_type max_width = 0;
         for (auto row: twodim_list)
-            if (row.size() > max_width_)
-                max_width_ = row.size();
+            if (row.size() > max_width)
+                max_width = row.size();
+        return max_width;
+    }
 
-        width_ = max_width_;
-
-        row_order_ = init_row_order();
-        col_order_ = init_col_order();
-
-        data_ = new value_type[height_ * width_];
+public:
+    MatrixContainer(std::initializer_list<std::initializer_list<value_type>> twodim_list)
+    :height_ {twodim_list.size()}, width_ {calc_width(twodim_list)}, data_ {new value_type[height_ * width_]}
+    {
         size_type act_row = 0;
         for (auto row: twodim_list)
         {
@@ -105,6 +112,18 @@ public:
 
 //------------------------=| Big five start |=-------------------------------
 
+    // sub method to swap
+private:
+    void swap(MatrixContainer& mat) noexcept
+    {
+        std::swap(height_, mat.height_);
+        std::swap(width_, mat.width_);
+        std::swap(data_, mat.data_);
+        std::swap(row_order_, mat.row_order_);
+        std::swap(col_order_, mat.col_order_);
+    }
+
+public:
     MatrixContainer(const MatrixContainer& rhs)
     :height_ {rhs.height_}, width_ {rhs.width_}, data_ {new value_type[height_ * width_]},
      row_order_ {new size_type[height_]}, col_order_ {new size_type[width_]}
@@ -114,34 +133,23 @@ public:
         std::copy(rhs.col_order_, rhs.col_order_ + width_, col_order_);
     }
 
-    MatrixContainer(MatrixContainer&& rhs)
-    :height_ {rhs.height_}, width_ {rhs.width_}, data_ {new value_type[height_ * width_]},
-     row_order_ {rhs.row_order_}, col_order_ {rhs.col_order_}
-    {
-        height_ = 0;
-        width_  = 0;
-        data_ = nullptr;
-        row_order_ = nullptr;
-        col_order_ = nullptr;
-    }
-
     MatrixContainer& operator=(const MatrixContainer& rhs)
     {
         MatrixContainer rhs_cpy {rhs};
         
-        std::swap(rhs_cpy, *this);
+        rhs_cpy.swap(*this);
 
         return *this;
     }
 
+    MatrixContainer(MatrixContainer&& rhs) noexcept
+    :height_ {rhs.height_}, width_ {rhs.width_}, data_ {rhs.data_},
+     row_order_ {rhs.row_order_}, col_order_ {rhs.col_order_}
+    {}
+
     MatrixContainer& operator=(MatrixContainer&& rhs)
     {
-        std::swap(rhs.height_, height_);
-        std::swap(rhs.width_, width_);
-        std::swap(rhs.data_, data_);
-        std::swap(rhs.row_order_, row_order_);
-        std::swap(rhs.col_order_, col_order_);
-
+        rhs.swap(*this);
         return *this;
     }
 

@@ -71,7 +71,6 @@ TEST(Constructors, _1x1_by_val_and_one_dim_list)
 
 TEST(Constructors, by_two_dim_list)
 {
-    std::cout << "Test start" << std::endl;
     MatrixArithmetic<int> mat1 {{1, 0}, {0, 1}};
     MatrixArithmetic<int> mat2 {{1}, {0, 1}};
     MatrixArithmetic<int> mat3 {{1, 2}, {5, 6, 7, 8}, {}};
