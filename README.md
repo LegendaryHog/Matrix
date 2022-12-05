@@ -1,10 +1,9 @@
-# My class od Matrix
+# My class Matrix
 My classes MatrixArithmetic and MatrixContainer.
 Base class is MatrixContainer: he has responsibitility to save memmory and give acces to two dimensional array.
 Derived class MatrixArithmetic: he has resposibiility to make arithmetical operations with matrix like summary, difference, determinant, inverse and other.
 
 # How to build?
-
 
 ```
 cmake -B build/
