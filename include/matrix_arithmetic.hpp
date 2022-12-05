@@ -22,7 +22,7 @@ template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T
  * then I say that division operation for T defined arrithmetical correct        |
  *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-class MatrixArithmetic final: public MatrixContainer<T> 
+class MatrixArithmetic : public MatrixContainer<T> 
 {
     using base       = MatrixContainer<T>; 
     using size_type  = typename std::size_t;
@@ -54,9 +54,13 @@ public:
     MatrixArithmetic(std::initializer_list<std::initializer_list<value_type>> twodim_list)
     :base::MatrixContainer(twodim_list)
     {}
+
+//--------------------------------=| Virtual dtor for inheritance
+    virtual ~MatrixArithmetic() {}
 //--------------------------------=| Ctors end |=-------------------------------------------------------
 
 //--------------------------------=| Types start |=-----------------------------------------------------
+    bool is_empty()  const {return base::height() == 0;}
     bool is_row()    const {return base::height() == 1;}
     bool is_column() const {return base::width() == 1;}
     bool is_scalar() const {return base::height() == 1 && base::width() == 1;}

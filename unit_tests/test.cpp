@@ -310,10 +310,13 @@ TEST(Operators, _operator_plus_)
 {
     MatrixArithmetic lhs1 = {{12, -3, 4}, {31, -5, 8}};
     MatrixArithmetic rhs1 = {{1, 0, 3}, {12, 3, 4}};
+    MatrixArithmetic lhs2 {lhs1};
+    MatrixArithmetic rhs2 {rhs1};
     MatrixArithmetic res1 = lhs1 + rhs1;
     MatrixArithmetic res1_example = {{13, -3, 7}, {43, -2, 12}};
 
     EXPECT_EQ(res1_example, res1);
+    EXPECT_EQ(res1_example, lhs2 + rhs2);
 }
 
 TEST(Operators, operator_unary_minus)
