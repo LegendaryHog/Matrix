@@ -5,7 +5,7 @@ struct DblCmp
 {
     bool operator()(double d1, double d2)
     {
-        return std::abs(d1 - d2) < 1e-10;
+        return std::abs(d1 - d2) <= (std::abs(d1) + std::abs(d2)) * 1e-10;
     }
 };
 

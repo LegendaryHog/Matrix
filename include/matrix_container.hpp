@@ -129,11 +129,7 @@ public:
     {
         MatrixContainer rhs_cpy {rhs};
         
-        std::swap(rhs_cpy.height_, height_);
-        std::swap(rhs_cpy.width_, width_);
-        std::swap(rhs_cpy.data_, data_);
-        std::swap(rhs_cpy.row_order_, row_order_);
-        std::swap(rhs_cpy.col_order_, col_order_);
+        std::swap(rhs_cpy, *this);
 
         return *this;
     }
