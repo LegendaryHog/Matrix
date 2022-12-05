@@ -49,13 +49,12 @@ private:
         }
         catch(std::bad_alloc) {throw;}
     }
-
-protected:
+    
     size_type* row_order_ = init_row_order();
     size_type* col_order_ = init_col_order();
 
 public:
-//------------------------=| Classic ctors start |=--------------------------
+//--------------------------------=| Classic ctors start |=---------------------------------------------
     MatrixContainer(size_type h, size_type w, value_type val = value_type{})
     :height_ {h}, width_ {w}, data_ {new value_type[height_ * width_]}
     {
@@ -108,9 +107,9 @@ public:
             act_row++;
         }
     }
-//------------------------=| Classic ctors end |=----------------------------
+//--------------------------------=| Classic ctors end |=-----------------------------------------------
 
-//------------------------=| Big five start |=-------------------------------
+//--------------------------------=| Big five start |=--------------------------------------------------
 
     // sub method to swap
 private:
@@ -133,23 +132,18 @@ public:
         std::copy(rhs.col_order_, rhs.col_order_ + width_, col_order_);
     }
 
+    MatrixContainer(MatrixContainer&& rhs) noexcept {swap(rhs);}
+
     MatrixContainer& operator=(const MatrixContainer& rhs)
     {
         MatrixContainer rhs_cpy {rhs};
-        
-        rhs_cpy.swap(*this);
-
+        swap(rhs_cpy);
         return *this;
     }
 
-    MatrixContainer(MatrixContainer&& rhs) noexcept
-    :height_ {rhs.height_}, width_ {rhs.width_}, data_ {rhs.data_},
-     row_order_ {rhs.row_order_}, col_order_ {rhs.col_order_}
-    {}
-
     MatrixContainer& operator=(MatrixContainer&& rhs)
     {
-        rhs.swap(*this);
+        swap(rhs);
         return *this;
     }
 
@@ -159,9 +153,9 @@ public:
         delete[] row_order_;
         delete[] col_order_;
     }
-//------------------------=| Big five end |=---------------------------------
+//--------------------------------=| Big five end |=----------------------------------------------------
 
-//------------------------=| Acces operators start |=------------------------
+//--------------------------------=| Acces operators start |=-------------------------------------------
     size_type height() const {return height_;}
     size_type width()  const {return width_;}
 
@@ -257,10 +251,34 @@ public:
     {
         return ProxyRow {*this, ind};
     }
-//------------------------=| Acces operators end |=--------------------------
+//--------------------------------=| Acces operators end |=---------------------------------------------
 
-//------------------------=| Iterators start |=------------------------------
+//--------------------------------=| Swap rows and columns start |=-------------------------------------
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++                                                                         
+ *----------------------------------------------------------------------------*
+ *      ________________________________________________________________      *
+ *---==| BE CAREFUL, THIS OPERATIONS INVALIDATE ITERATORS AND REFERENCES|==---*
+ *      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      *
+ *----------------------------------------------------------------------------*
+ */                               
+    void swap_row(size_type ind1, size_type ind2)
+    {
+        if (ind1 >= height() || ind2 >= height())
+            throw std::out_of_range{"try to swap rows with indexis out of range"};
 
+        std::swap(row_order_[ind1], row_order_[ind2]);
+    }
+
+    void swap_col(size_type ind1, size_type ind2)
+    {
+        if (ind1 >= width() || ind2 >= width())
+            throw std::out_of_range{"try to swap columns with indexis out of range"};
+
+        std::swap(col_order_[ind1], col_order_[ind2]);
+    }
+//--------------------------------=| Swap rows and columns end |=---------------------------------------
+
+//--------------------------------=| Iterators start |=-------------------------------------------------
     class Iterator 
     {
         pointer data_ = nullptr;
@@ -416,7 +434,7 @@ public:
     ConstIterator end()   const& {return ConstIterator {*this, height_, 0};}
     ConstIterator cbegin() const& {return ConstIterator {*this, 0, 0};}
     ConstIterator cend()   const& {return ConstIterator {*this, height_, 0};}
-//------------------------=| Iterators end |=--------------------------------
+//--------------------------------=| Iterators end |=---------------------------------------------------
 };
 
 template<typename value_type = int>
