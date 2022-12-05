@@ -367,8 +367,8 @@ TEST(Operators, cast_to_scalar)
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
-    testing::InitGoogleTest();
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

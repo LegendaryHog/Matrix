@@ -4,6 +4,6 @@ add_executable(test_run ${SRC_LIST})
 
 target_link_libraries(test_run PRIVATE ${GTEST_LIBRARIES})
 
-target_include_directories(test_run PRIVATE)
+target_include_directories(test_run PRIVATE ../include)
 
 gtest_discover_tests(test_run)
