@@ -232,9 +232,11 @@ TEST(Methods, inverse)
 {
     MatrixArithmetic<double, true, DblCmp> mat1 = {{1, 12, 3}, {23, 56.8, 78}, {43, 32, 7}};
     MatrixArithmetic<double, true, DblCmp> mat2 = {{4, 9}, {1, 2}};
+    MatrixArithmetic eye_mat {MatrixArithmetic<double, true, DblCmp>::eye(6)};
 
     EXPECT_EQ(mat1.inverse().inverse(), mat1);
     EXPECT_EQ(mat2.inverse().inverse(), mat2);
+    EXPECT_EQ(eye_mat.inverse(), eye_mat);
 }
 
 TEST(Methods, det_for_other)
@@ -364,6 +366,15 @@ TEST(Operators, cast_to_scalar)
     EXPECT_EQ(value_int + scalar_mat, 9);
     EXPECT_THROW(value_int = mat + 5, std::invalid_argument);
     EXPECT_THROW(value_int = 5 + mat, std::invalid_argument);
+}
+
+TEST(Methods, power)
+{
+    MatrixArithmetic eye_mat {MatrixArithmetic<double, true, DblCmp>::eye(10)};
+    try {EXPECT_EQ(power(eye_mat, -5), eye_mat);}
+    catch (std::invalid_argument) {std::cerr << "first" << std::endl; throw;}
+    try {EXPECT_EQ(power(eye_mat, 5), eye_mat);}
+    catch (std::invalid_argument) {std::cerr << "second" << std::endl; throw;}
 }
 
 

@@ -49,7 +49,7 @@ private:
         }
         catch(std::bad_alloc) {throw;}
     }
-    
+
     size_type* row_order_ = init_row_order();
     size_type* col_order_ = init_col_order();
 
@@ -201,16 +201,11 @@ private:
         pointer row_ = nullptr;
         const size_type* col_order_in_row_ = nullptr;
     public:
-        ProxyRow(const MatrixContainer& mat, size_type row_ind)
+        ProxyRow(MatrixContainer& mat, size_type row_ind)
         :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
         {}
 
-        reference operator[](size_type ind) & noexcept
-        {
-            return row_[col_order_in_row_[ind]];
-        }
-
-        value_type operator[](size_type ind) && noexcept
+        reference operator[](size_type ind)
         {
             return row_[col_order_in_row_[ind]];
         }
@@ -225,31 +220,41 @@ private:
         :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
         {}
 
-        const_reference operator[](size_type ind) & noexcept
+        const_reference operator[](size_type ind)
         {
             return row_[col_order_in_row_[ind]];
         }
+    };
 
-        value_type operator[](size_type ind) && noexcept
+    class TmpProxyRow
+    {
+        const_pointer row_ = nullptr;
+        size_type* col_order_in_row_ = nullptr;
+    public:
+        TmpProxyRow(const MatrixContainer& mat, size_type row_ind)
+        :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
+        {}
+
+        value_type operator[](size_type ind)
         {
             return row_[col_order_in_row_[ind]];
         }
     };
 
 public:
-    ProxyRow operator[](size_type ind) & noexcept
+    ProxyRow operator[](size_type ind) &
     {
         return ProxyRow {*this, ind};
     }
 
-    ConstProxyRow operator[](size_type ind) const& noexcept
+    ConstProxyRow operator[](size_type ind) const &
     {
         return ConstProxyRow {*this, ind};
     }
 
-    ProxyRow operator[](size_type ind) && noexcept
+    TmpProxyRow operator[](size_type ind) &&
     {
-        return ProxyRow {*this, ind};
+        return TmpProxyRow {*this, ind};
     }
 //--------------------------------=| Acces operators end |=---------------------------------------------
 

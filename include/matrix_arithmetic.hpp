@@ -305,7 +305,7 @@ public:
             elem /= rhs;
         return *this;
     }
-//--------------------------------=| Basic arithmetic end |=-------------------------------------------
+//--------------------------------=| Basic arithmetic end |=--------------------------------------------
 
 //--------------------------------=| Specific static ctors start |=-------------------------------------
     static MatrixArithmetic square(size_type sz, value_type val = value_type{})
@@ -337,7 +337,7 @@ public:
         return diag(sz, begin, end);
     }
 
-    static MatrixArithmetic diag(size_type sz, T val = T{})
+    static MatrixArithmetic diag(size_type sz, value_type val = value_type{})
     {
         MatrixArithmetic result {square(sz)};
         for (size_type i = 0; i < sz; i++)
@@ -354,26 +354,25 @@ public:
 
 //--------------------------------=| Wrappers arounf methods start |=-----------------------------------
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-T determinant(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
+T determinant(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.determinant();
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-std::pair<bool, MatrixArithmetic<T, IsDivArithm, Cmp>> inverse_pair(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
+std::pair<bool, MatrixArithmetic<T, IsDivArithm, Cmp, Abs>> inverse_pair(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.inverse_pair();
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> inverse(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> inverse(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.inverse();
 }
 
-
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> transpos(const MatrixArithmetic<T, IsDivArithm, Cmp>& mat)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> transpos(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.transpos();
 }
@@ -381,12 +380,12 @@ MatrixArithmetic<T, IsDivArithm, Cmp> transpos(const MatrixArithmetic<T, IsDivAr
 
 //--------------------------------=| Arrithmetical operators start |=-----------------------------------
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> product(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     if (lhs.is_scalar())
     {
         MatrixArithmetic res {rhs};
-        T& scalar = lhs;
+        const T& scalar = lhs;
         for (auto elem: res)
             elem *= scalar;
         return res;
@@ -394,7 +393,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp> product(const MatrixArithmetic<T, IsDivAri
     if (rhs.is_scalar())
     {
         MatrixArithmetic res {lhs};
-        T& scalar = rhs;
+        const T& scalar = rhs;
         for (auto elem: res)
             elem *= scalar;
         return res;
@@ -402,7 +401,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp> product(const MatrixArithmetic<T, IsDivAri
     if (lhs.width() != rhs.height())
         throw std::invalid_argument{"in product: lhs.width() != rhs.height()"};
 
-    MatrixArithmetic<T, IsDivArithm, Cmp> res (lhs.height(), rhs.width());
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> res (lhs.height(), rhs.width());
 
     for (std::size_t i = 0; i < lhs.height(); i++)
         for (std::size_t j = 0; j < rhs.width(); j++)
@@ -413,48 +412,71 @@ MatrixArithmetic<T, IsDivArithm, Cmp> product(const MatrixArithmetic<T, IsDivAri
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-bool operator==(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> power(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat, long long pow)
+    {
+        if (!mat.is_square())
+            throw std::invalid_argument{"Try to make matrix in some power but this matrix is not square"};
+
+        if (pow == 0)
+            return MatrixArithmetic<T, IsDivArithm, Cmp, Abs>::eye(mat.height());
+
+        MatrixArithmetic<T, IsDivArithm, Cmp, Abs> res {mat};
+
+        if (pow < 0)
+        {
+            res = res.inverse();
+            pow = -pow;
+        }
+        
+        for (long long i = 1; i < pow; i++)
+            res = product(mat, res);
+        
+        return res;
+    }
+
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+bool operator==(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     return lhs.equal_to(rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-bool operator!=(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
+bool operator!=(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     return !lhs.equal_to(rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> operator+(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator+(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy += rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> operator-(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator-(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy -= rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> operator*(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const T& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator*(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy *= rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> operator*(const T& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp>& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator*(const T& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     return rhs * lhs;
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
-MatrixArithmetic<T, IsDivArithm, Cmp> operator/(const MatrixArithmetic<T, IsDivArithm, Cmp>& lhs, const T& rhs)
+MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator/(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy /= rhs);
 }
 //--------------------------------=| Arrithmetical operators end |=-------------------------------------
