@@ -13,7 +13,7 @@ namespace Matrix
 template<typename T = int>
 class MatrixContainer
 {
-
+public:
     using size_type         = typename std::size_t;
     using iterator_category = typename std::random_access_iterator_tag;
     using difference_type   = typename std::ptrdiff_t;
@@ -286,22 +286,46 @@ public:
 //--------------------------------=| Iterators start |=-------------------------------------------------
     class Iterator 
     {
+    public:
+        using iterator_category = typename std::random_access_iterator_tag;
+        using difference_type   = typename std::ptrdiff_t;
+        using value_type        = T;
+        using pointer           = T*;
+        using const_pointer     = const T*;
+        using reference         = T&;
+        using const_reference   = const T&;
+    private:
         pointer data_ = nullptr;
-        size_type i_, j_ = 0;
+        size_type i_ = 0, j_ = 0;
         size_type width_ = 0;
         size_type* row_order_ = nullptr;
         size_type* col_order_ = nullptr;
+
+        difference_type diff_with_begin() const
+        {
+            return static_cast<difference_type>(i_ * width_ + j_);
+        }
+
+        void convert_from_diff_with_begin(const difference_type& diff)
+        {
+            if (diff < 0)
+                return;
+            i_ = diff / width_;
+            j_ = diff % width_;
+        }
 
     public:
         Iterator(const MatrixContainer& mat, size_type i, size_type j)
         :data_ {mat.data_}, i_ {i}, j_ {j}, width_ {mat.width_}, row_order_ {mat.row_order_}, col_order_ {mat.col_order_} {}
 
-        reference operator*() & noexcept
+        Iterator() = default;
+
+        reference operator*() const& noexcept
         {
             return data_[row_order_[i_] * width_ + col_order_[j_]]; 
         }
 
-        pointer operator->() & noexcept
+        pointer operator->() const& noexcept
         {
             return &data_[row_order_[i_] * width_ + col_order_[j_]];
         }
@@ -347,15 +371,87 @@ public:
             return tmp;
         }
 
-        friend bool operator== (const Iterator& lhs, const Iterator& rhs)
+        Iterator& operator+=(const difference_type& rhs)
         {
-            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ == rhs.j_;
+            convert_from_diff_with_begin(diff_with_begin() + rhs);
+            return *this;
         }
 
-        friend bool operator!= (const Iterator& lhs, const Iterator& rhs)
+        Iterator& operator-=(const difference_type& rhs)
         {
-            return !(lhs == rhs);
-        }   
+            convert_from_diff_with_begin(diff_with_begin() - rhs);
+            return *this;
+        }
+
+        friend Iterator operator+(const Iterator& itr, const difference_type& diff)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy += diff);
+        }
+
+        friend Iterator operator+(const difference_type& diff, const Iterator& itr)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy += diff);
+        }
+
+        friend Iterator operator-(const Iterator& itr, const difference_type& diff)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy -= diff);
+        }
+
+        friend Iterator operator-(const difference_type& diff, const Iterator& itr)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy -= diff);
+        }
+
+        friend difference_type operator-(const Iterator& lhs, const Iterator& rhs)
+        {
+            return lhs.diff_with_begin() - rhs.diff_with_begin();
+        }
+
+        reference operator[](const difference_type& diff) const
+        {
+            Iterator new_itr {*this};
+            return *(new_itr += diff);
+        }
+
+        bool operator==(const Iterator& rhs) const
+        {
+            return data_ == rhs.data_ && i_ == rhs.i_ && j_ == rhs.j_;
+        }
+
+        bool operator!=(const Iterator& rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        bool operator<(const Iterator& rhs) const
+        {
+            if (i_ < rhs.i_)
+                return true;
+            else if (i_ == rhs.i_)
+                return j_ < rhs.j_;
+            else
+                return false;
+        }
+
+        bool operator<=(const Iterator& rhs) const
+        {
+            return (*this == rhs) || (*this < rhs);
+        }
+
+        bool operator>(const Iterator& rhs) const
+        {
+            return !(*this <= rhs);
+        }
+
+        bool operator>=(const Iterator& rhs) const
+        {
+            return !(this < rhs);
+        }
     };
 
     Iterator begin() & {return Iterator {*this, 0, 0};}

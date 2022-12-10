@@ -380,6 +380,7 @@ TEST(Methods, power)
 
 int main(int argc, char **argv)
 {
+    static_assert(std::random_access_iterator<MatrixArithmetic<int>::Iterator>);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
