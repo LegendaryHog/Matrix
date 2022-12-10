@@ -377,10 +377,15 @@ TEST(Methods, power)
     catch (std::invalid_argument) {std::cerr << "second" << std::endl; throw;}
 }
 
+TEST(Iterators, Iterator_and_ConstIterator)
+{
+    EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
+    EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
+}
+
 
 int main(int argc, char **argv)
 {
-    static_assert(std::random_access_iterator<MatrixArithmetic<int>::Iterator>);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
