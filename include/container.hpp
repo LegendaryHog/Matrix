@@ -276,7 +276,7 @@ public:
 
         ConstIterator operator--(int)
         {
-            Iterator tmp {*this};
+            ConstIterator tmp {*this};
             --(*this);
             return tmp;
         }
@@ -295,7 +295,7 @@ public:
 
         friend ConstIterator operator+(const ConstIterator& itr, const difference_type& diff)
         {
-            Iterator itr_cpy {itr};
+            ConstIterator itr_cpy {itr};
             return (itr_cpy += diff);
         }
 
@@ -313,7 +313,7 @@ public:
 
         friend ConstIterator operator-(const difference_type& diff, const ConstIterator& itr)
         {
-            Iterator itr_cpy {itr};
+            ConstIterator itr_cpy {itr};
             return (itr_cpy -= diff);
         }
 
