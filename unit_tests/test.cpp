@@ -3,12 +3,109 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <array>
 
 #include "matrix_arithmetic.hpp"
+#include "container.hpp"
 
 //#define PRINT
 
 using namespace Matrix;
+
+TEST(Container_Array, ctor_size_acces_opers_big_five)
+{
+    Container::Array<int> arr1 (4);
+    EXPECT_EQ(arr1.size(), 4);
+
+    for(std::size_t i = 0; i < arr1.size(); i++)
+    {
+        EXPECT_EQ(arr1[i], 0);
+        EXPECT_EQ(arr1.at(i), 0);
+    }
+    EXPECT_THROW(arr1.at(4), std::out_of_range);
+
+    arr1[0] = 3;
+    arr1[1] = 56;
+    arr1[2] = 34;
+    arr1[3] = 7;
+
+    const Container::Array carr2 {arr1};
+    EXPECT_EQ(carr2.size(), arr1.size());
+    for (std::size_t i = 0; i < arr1.size(); i++)
+        EXPECT_EQ(arr1[i], carr2[i]);
+
+    Container::Array arr3 {std::move(arr1)};
+    Container::Array arr4 {std::move(carr2)};
+
+    EXPECT_EQ(arr3.size(), arr4.size());
+    EXPECT_EQ(arr3.size(), 4);
+    for (std::size_t i = 0; i < arr3.size(); i++)
+        EXPECT_EQ(arr3[i], arr4[i]);
+
+    Container::Array<int> arr5 {3, 56, 34, 7, 8};
+    EXPECT_EQ(arr5.size(), 5);
+
+    arr5 = arr3;
+    EXPECT_EQ(arr5.size(), arr3.size());
+    for (std::size_t i = 0; i < arr5.size(); i++)
+        EXPECT_EQ(arr3[i], arr5[i]);
+
+    Container::Array<int> arr6 {13, 56, 87, 189, 789};
+    arr5 = std::move(arr6);
+
+    Container::Array<int> arr7 {13, 56, 87, 189, 789};
+    EXPECT_EQ(arr7.size(), arr5.size());
+    EXPECT_EQ(arr7.size(), 5);
+    
+    for (std::size_t i = 0; i < 5; i++)
+    {
+        EXPECT_EQ(arr5[i], arr7[i]);
+        EXPECT_EQ(arr5.at(i), arr7.at(i));
+    }
+
+    std::array<int, 6> sarr {135, 45, 6, 5, 89, 90};
+    Container::Array<int> arr8 (sarr.begin(), sarr.end());
+    EXPECT_EQ(sarr.size(), arr8.size());
+    for (std::size_t i = 0; i < 6; i++)
+        EXPECT_EQ(sarr[i], arr8[i]);
+}
+
+TEST(Container_Array, Iterators)
+{
+    static_assert(std::random_access_iterator<Container::Array<>::Iterator>);
+    static_assert(std::random_access_iterator<Container::Array<>::ConstIterator>);
+
+    Container::Array<int> arr {23, 46, 78, 89, 90};
+    std::array<int, 5> cpy_arr {23, 46, 78, 89, 90};
+
+    EXPECT_EQ(arr.end() - arr.begin(), arr.size());
+    auto itr = arr.begin();
+    itr++;
+    EXPECT_EQ(++itr, arr.begin() + 2);
+    EXPECT_LT(itr, arr.end());
+    EXPECT_GT(arr.end(), itr);
+    EXPECT_LE(itr += 2, arr.end());
+    EXPECT_LE(itr, --arr.end());
+    int i = 0;
+    for (auto& elem: arr)
+    {
+        EXPECT_EQ(elem, cpy_arr[i++]);
+    }
+
+    EXPECT_EQ(arr.cend() - arr.cbegin(), arr.size());
+    auto citr = arr.cbegin();
+    citr++;
+    EXPECT_EQ(++citr, arr.cbegin() + 2);
+    EXPECT_LT(citr, arr.cend());
+    EXPECT_GT(arr.cend(), citr);
+    EXPECT_LE(citr += 2, arr.cend());
+    EXPECT_LE(citr, --arr.cend());
+    int j = 0;
+    for (auto elem: arr)
+    {
+        EXPECT_EQ(elem, cpy_arr[j++]);
+    }
+}
 
 TEST(Constructors, by_1_val)
 {

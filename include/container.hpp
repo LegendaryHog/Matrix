@@ -3,7 +3,7 @@
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
-#include <cstddef>
+#include <algorithm>
 
 namespace Container
 {
@@ -45,8 +45,8 @@ public:
         std::copy(begin, end, data_);
     }
 
-    Array(std::initializer_list<value_type>& list)
-    :size_ {list.szie()}, data_ {new value_type[size_]}
+    Array(std::initializer_list<T> list)
+    :size_ {list.size()}, data_ {new value_type[size_]}
     {
         std::copy(list.begin(), list.end(), data_);
     }
@@ -54,7 +54,7 @@ public:
 
 //-------------------------------=| Big five start |=---------------------------------
 private:
-    void swap(const Array& arr) noexcept
+    void swap(Array& arr) noexcept
     {
         std::swap(data_, arr.data_);
         std::swap(size_, arr.size_);
@@ -98,22 +98,22 @@ public:
     const_reference operator[](size_type index) const& noexcept {return data_[index];}
     value_type      operator[](size_type index) && noexcept     {return data_[index];}
 
-    reference at(size_type index) & noexcept      
+    reference at(size_type index) &  
     {
         if(index >= size_)
-            std::out_of_range{"try to get acces to element out of array"};
+            throw std::out_of_range{"try to get acces to element out of array"};
         return data_[index];
     }
-    const_reference at(size_type index) const& noexcept 
+    const_reference at(size_type index) const&
     {
         if(index >= size_)
-            std::out_of_range{"try to get acces to element out of array"};
+            throw std::out_of_range{"try to get acces to element out of array"};
         return data_[index];
     }
-    value_type at(size_type index) && noexcept            
+    value_type at(size_type index) &&          
     {
         if(index >= size_)
-            std::out_of_range{"try to get acces to element out of array"};
+            throw std::out_of_range{"try to get acces to element out of array"};
         return data_[index];
     }
 //-------------------------------=| Acces op end |=-----------------------------------
@@ -129,16 +129,20 @@ public:
         using reference         = T&;
 
     private:
-        pointer ptr_ = nullptr;
+        pointer ptr_;
     
     public:
+        Iterator(pointer ptr = nullptr)
+        :ptr_ {ptr}
+        {}
+
         reference operator*()  const& noexcept {return *ptr_;}
         pointer   operator->() const& noexcept {return ptr_;}
 
         Iterator& operator++()
         {
             ptr_++;
-            return ptr_;
+            return *this;
         }
 
         Iterator operator++(int)
@@ -151,7 +155,7 @@ public:
         Iterator& operator--()
         {
             ptr_--;
-            return ptr_;
+            return *this;
         }
 
         Iterator operator--(int)
@@ -220,7 +224,7 @@ public:
 
         friend bool operator<(const Iterator& lhs, const Iterator& rhs)
         {
-            return lhs.ptr < rhs.ptr;
+            return lhs.ptr_ < rhs.ptr_;
         }
 
         friend bool operator<=(const Iterator& lhs, const Iterator& rhs)
@@ -249,21 +253,25 @@ public:
         using const_reference   = const T&;
 
     private:
-        const_pointer ptr_ = nullptr;
+        const_pointer ptr_;
     
     public:
+        ConstIterator(const_pointer ptr = nullptr)
+        :ptr_ {ptr}
+        {}
+
         const_reference operator*()  const& noexcept {return *ptr_;}
         const_pointer   operator->() const& noexcept {return ptr_;}
 
         ConstIterator& operator++()
         {
             ptr_++;
-            return ptr_;
+            return *this;
         }
 
-        CosntIterator operator++(int)
+        ConstIterator operator++(int)
         {
-            Iterator tmp {*this};
+            ConstIterator tmp {*this};
             ++(*this);
             return tmp;
         }
@@ -271,7 +279,7 @@ public:
         ConstIterator& operator--()
         {
             ptr_--;
-            return ptr_;
+            return *this;
         }
 
         ConstIterator operator--(int)
@@ -340,10 +348,10 @@ public:
 
         friend bool operator<(const ConstIterator& lhs, const ConstIterator& rhs)
         {
-            return lhs.ptr < rhs.ptr;
+            return lhs.ptr_ < rhs.ptr_;
         }
 
-        friend bool operator<=(const CosntIterator& lhs, const ConstIterator& rhs)
+        friend bool operator<=(const ConstIterator& lhs, const ConstIterator& rhs)
         {
             return (lhs == rhs) || (lhs < rhs);
         }
