@@ -54,10 +54,11 @@ public:
     MatrixArithmetic(std::initializer_list<std::initializer_list<value_type>> twodim_list)
     :base::MatrixContainer(twodim_list)
     {}
-
-//--------------------------------=| Virtual dtor for inheritance
-    virtual ~MatrixArithmetic() {}
 //--------------------------------=| Ctors end |=-------------------------------------------------------
+
+//--------------------------------=| Virtual dtor for inheritance start |=------------------------------
+    virtual ~MatrixArithmetic() {}
+//--------------------------------=| Virtual dtor for inheritance end |=--------------------------------
 
 //--------------------------------=| Types start |=-----------------------------------------------------
     bool is_empty()  const {return base::height() == 0;}

@@ -14,14 +14,12 @@ template<typename T = int>
 class MatrixContainer
 {
 public:
-    using size_type         = typename std::size_t;
-    using iterator_category = typename std::random_access_iterator_tag;
-    using difference_type   = typename std::ptrdiff_t;
-    using value_type        = T;
-    using pointer           = T*;
-    using const_pointer     = const T*;
-    using reference         = T&;
-    using const_reference   = const T&;
+    using size_type       = typename std::size_t;
+    using value_type      = T;
+    using pointer         = T*;
+    using const_pointer   = const T*;
+    using reference       = T&;
+    using const_reference = const T&;
 
 private:
     size_type height_ = 0, width_ = 0;
@@ -76,7 +74,7 @@ public:
     MatrixContainer(value_type val = value_type{})
     :height_ {1}, width_ {1}, data_ {new value_type[1]{val}} {}
 
-    MatrixContainer(std::initializer_list<value_type> onedim_list)
+    MatrixContainer(std::initializer_list<value_type>& onedim_list)
     :height_ {onedim_list.size()}, width_ {1}, data_ {new value_type[height_ * width_]}
     {
         std::copy(onedim_list.begin(), onedim_list.end(), data_);
@@ -416,39 +414,39 @@ public:
             return *(new_itr += diff);
         }
 
-        bool operator==(const Iterator& rhs) const
+        friend bool operator==(const Iterator& lhs, const Iterator& rhs)
         {
-            return data_ == rhs.data_ && i_ == rhs.i_ && j_ == rhs.j_;
+            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ == rhs.j_;
         }
 
-        bool operator!=(const Iterator& rhs) const
+        friend bool operator!=(const Iterator& lhs, const Iterator& rhs)
         {
-            return !(*this == rhs);
+            return !(lhs == rhs);
         }
 
-        bool operator<(const Iterator& rhs) const
+        friend bool operator<(const Iterator& lhs, const Iterator& rhs)
         {
-            if (i_ < rhs.i_)
+            if (lhs.i_ < rhs.i_)
                 return true;
-            else if (i_ == rhs.i_)
-                return j_ < rhs.j_;
+            else if (lhs.i_ == rhs.i_)
+                return lhs.j_ < rhs.j_;
             else
                 return false;
         }
 
-        bool operator<=(const Iterator& rhs) const
+        friend bool operator<=(const Iterator& lhs, const Iterator& rhs)
         {
-            return (*this == rhs) || (*this < rhs);
+            return (lhs == rhs) || (lhs < rhs);
         }
 
-        bool operator>(const Iterator& rhs) const
+        friend bool operator>(const Iterator& lhs, const Iterator& rhs)
         {
-            return !(*this <= rhs);
+            return !(lhs <= rhs);
         }
 
-        bool operator>=(const Iterator& rhs) const
+        friend bool operator>=(const Iterator& lhs, const Iterator& rhs)
         {
-            return !(this < rhs);
+            return !(lhs < rhs);
         }
     };
 
