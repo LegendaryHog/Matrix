@@ -14,10 +14,12 @@ template<typename T = int>
 class MatrixContainer
 {
 public:
-    using size_type       = typename std::size_t;
-    using value_type      = T;
-    using reference       = T&;
-    using const_reference = const T&;
+    using size_type          = typename std::size_t;
+    using value_type         = T;
+    using reference          = T&;
+    using const_reference    = const T&;
+    using ArrayIterator      = Container::Array<value_type>::Iterator;
+    using ArrayConstIterator = Container::Array<value_type>::ConstIterator;
 
 private:
     size_type height_ = 0, width_ = 0;
@@ -144,6 +146,43 @@ public:
         if (i >= height_ || j >= width_)
             throw std::out_of_range{"try to get access to element out of matrix"};
         return data_[row_order_[i] * width_ + col_order_[j]];
+    }
+
+    class ProxyRow
+    {
+        Container::Array<size_type>& col_order_;
+        ArrayIterator                row_itr_;
+    public:
+        reference operator[](size_type index)
+        {
+            return *(row_itr_ + col_order_[index]);
+        }
+    };
+
+    class ConstProxyRow
+    {
+        Container::Array<size_type>& col_order_;
+        ArrayConstIterator           row_itr_;
+    public:
+        const_reference operator[](size_type index)
+        {
+            return *(row_itr_ + col_order_[index]);
+        }
+    };
+
+    ProxyRow operator[](size_type index) &
+    {
+        return ProxyRow{col_order_, data_.begin() + row_order_[index]};
+    }
+
+    ConstProxyRow operator[](size_type index) const&
+    {
+        return ConstProxyRow{col_order_, data_.cbegin() + row_order_[index]};
+    }
+
+    ConstProxyRow operator[](size_type index) &&
+    {
+        return ConstProxyRow{col_order_, data_.cbegin() + row_order_[index]};
     }
 //--------------------------------=| Acces operators end |=---------------------------------------------
 
