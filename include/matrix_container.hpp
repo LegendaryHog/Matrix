@@ -212,6 +212,18 @@ public:
 //--------------------------------=| Swap rows and columns end |=---------------------------------------
 
 //--------------------------------=| Iterators start |=-------------------------------------------------
+    class Iterator
+    {
+    public:
+        using iterator_category = typename std::random_access_iterator_tag;
+        using difference_type   = typename std::ptrdiff_t;
+        using value_type        = T;
+        using pointer           = T*;
+        using reference         = T&;
+    private:
+        size_type i_, j_;
+        Array
+    };
 
 //--------------------------------=| Iterators end |=---------------------------------------------------
 };
