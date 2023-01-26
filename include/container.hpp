@@ -21,7 +21,6 @@ class Array
     size_type size_ = 0;
     pointer   data_ = nullptr; 
 
-
 //-------------------------------=| Ctors start |=------------------------------------
 public:
     Array(size_type size = 0)
@@ -29,6 +28,7 @@ public:
     {}
 
 private:
+    // sub func
     template<std::input_iterator it>
     size_type calc_size(it begin, it end)
     {
@@ -208,8 +208,7 @@ public:
 
         reference operator[](const difference_type& diff) const
         {
-            Iterator new_itr {*this};
-            return *(new_itr += diff);
+            return *this + diff;
         }
 
         friend bool operator==(const Iterator& lhs, const Iterator& rhs)
@@ -332,8 +331,7 @@ public:
 
         const_reference operator[](const difference_type& diff) const
         {
-            ConstIterator new_itr {*this};
-            return *(new_itr += diff);
+            return *this + diff;
         }
 
         friend bool operator==(const ConstIterator& lhs, const ConstIterator& rhs)

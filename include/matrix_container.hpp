@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <cstddef>
 
+#include "container.hpp"
+
 namespace Matrix
 {
 
@@ -16,31 +18,29 @@ class MatrixContainer
 public:
     using size_type       = typename std::size_t;
     using value_type      = T;
-    using pointer         = T*;
-    using const_pointer   = const T*;
     using reference       = T&;
     using const_reference = const T&;
 
 private:
     size_type height_ = 0, width_ = 0;
-    pointer data_ = nullptr;
+    Container::Array<value_type> data_;
 
-    size_type* init_row_order() const
+    Container::Array<size_type> init_row_order() const
     {
         try 
         {
-            size_type* row_order = new size_type[height_];
+            Container::Array<size_type> row_order (height_);
             for (size_type i = 0; i < height_; i++)
                 row_order[i] = i;
             return row_order;
         }
         catch (std::bad_alloc) {throw;}
     }
-    size_type* init_col_order() const
+    Container::Array<size_type> init_col_order() const
     {
         try
         {
-            size_type* col_order = new size_type[width_];
+            Container::Array<size_type> col_order (width_);
             for (size_type i = 0; i < width_; i++)
                 col_order[i] = i;
             return col_order;
@@ -48,34 +48,35 @@ private:
         catch(std::bad_alloc) {throw;}
     }
 
-    size_type* row_order_ = init_row_order();
-    size_type* col_order_ = init_col_order();
+    Container::Array<size_type> row_order_ {init_row_order()};
+    Container::Array<size_type> col_order_ {init_col_order()};
 
 public:
 //--------------------------------=| Classic ctors start |=---------------------------------------------
     MatrixContainer(size_type h, size_type w, value_type val = value_type{})
-    :height_ {h}, width_ {w}, data_ {new value_type[height_ * width_]}
+    :height_ {h}, width_ {w}, data_ (height_ * width_)
     {
-        for (size_type i = 0; i < height_ * width_; i++)
-            data_[i] = val;
+        for (auto& elem: data_)
+            elem = val;
     }
 
     template<std::input_iterator it>
     MatrixContainer(size_type h, size_type w, it begin, it end)
-    :height_ {h}, width_ {w}, data_ {new value_type[height_ * width_]}
+    :height_ {h}, width_ {w}, data_ (height_ * width_)
     {   
-        auto i = 0;
-        for (auto itr = begin; i < height_ * width_ && itr != end; i++, ++itr)
-            data_[i] = *itr;
-        for (; i < height_ * width_; i++)
-            data_[i] = value_type{};   
+        auto itr_data = data_.begin();
+        auto data_end = data_.end();
+        for (auto itr_input = begin; itr_input != end && itr_data != data_end; ++itr_input, ++itr_data)
+            *itr_data = *itr_input;
+        for (; itr_data != data_end; ++itr_data)
+            *itr_data = value_type{};
     }
 
     MatrixContainer(value_type val = value_type{})
-    :height_ {1}, width_ {1}, data_ {new value_type[1]{val}} {}
+    :height_ {1}, width_ {1}, data_ {val} {}
 
     MatrixContainer(std::initializer_list<value_type> onedim_list)
-    :height_ {onedim_list.size()}, width_ {1}, data_ {new value_type[height_ * width_]}
+    :height_ {onedim_list.size()}, width_ {1}, data_ (height_ * width_)
     {
         std::copy(onedim_list.begin(), onedim_list.end(), data_);
     }
@@ -93,7 +94,7 @@ private:
 
 public:
     MatrixContainer(std::initializer_list<std::initializer_list<value_type>> twodim_list)
-    :height_ {twodim_list.size()}, width_ {calc_width(twodim_list)}, data_ {new value_type[height_ * width_]}
+    :height_ {twodim_list.size()}, width_ {calc_width(twodim_list)}, data_ (height_ * width_)
     {
         size_type act_row = 0;
         for (auto row: twodim_list)
@@ -106,52 +107,6 @@ public:
         }
     }
 //--------------------------------=| Classic ctors end |=-----------------------------------------------
-
-//--------------------------------=| Big five start |=--------------------------------------------------
-
-    // sub method to swap
-private:
-    void swap(MatrixContainer& mat) noexcept
-    {
-        std::swap(height_, mat.height_);
-        std::swap(width_, mat.width_);
-        std::swap(data_, mat.data_);
-        std::swap(row_order_, mat.row_order_);
-        std::swap(col_order_, mat.col_order_);
-    }
-
-public:
-    MatrixContainer(const MatrixContainer& rhs)
-    :height_ {rhs.height_}, width_ {rhs.width_}, data_ {new value_type[height_ * width_]},
-     row_order_ {new size_type[height_]}, col_order_ {new size_type[width_]}
-    {
-        std::copy(rhs.data_, rhs.data_ + height_ * width_, data_);
-        std::copy(rhs.row_order_, rhs.row_order_ + height_, row_order_);
-        std::copy(rhs.col_order_, rhs.col_order_ + width_, col_order_);
-    }
-
-    MatrixContainer(MatrixContainer&& rhs) noexcept {swap(rhs);}
-
-    MatrixContainer& operator=(const MatrixContainer& rhs)
-    {
-        MatrixContainer rhs_cpy {rhs};
-        swap(rhs_cpy);
-        return *this;
-    }
-
-    MatrixContainer& operator=(MatrixContainer&& rhs)
-    {
-        swap(rhs);
-        return *this;
-    }
-
-    virtual ~MatrixContainer()
-    {
-        delete[] data_;
-        delete[] row_order_;
-        delete[] col_order_;
-    }
-//--------------------------------=| Big five end |=----------------------------------------------------
 
 //--------------------------------=| Acces operators start |=-------------------------------------------
     size_type height() const {return height_;}
@@ -191,68 +146,6 @@ public:
         if (i >= height_ || j >= width_)
             throw std::out_of_range{"try to get access to element out of matrix"};
         return data_[row_order_[i] * width_ + col_order_[j]];
-    }
-
-private:
-    class ProxyRow
-    {
-        pointer row_ = nullptr;
-        const size_type* col_order_in_row_ = nullptr;
-    public:
-        ProxyRow(MatrixContainer& mat, size_type row_ind)
-        :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
-        {}
-
-        reference operator[](size_type ind)
-        {
-            return row_[col_order_in_row_[ind]];
-        }
-    };
-
-    class ConstProxyRow
-    {
-        const_pointer row_ = nullptr;
-        size_type* col_order_in_row_ = nullptr;
-    public:
-        ConstProxyRow(const MatrixContainer& mat, size_type row_ind)
-        :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
-        {}
-
-        const_reference operator[](size_type ind)
-        {
-            return row_[col_order_in_row_[ind]];
-        }
-    };
-
-    class TmpProxyRow
-    {
-        const_pointer row_ = nullptr;
-        size_type* col_order_in_row_ = nullptr;
-    public:
-        TmpProxyRow(const MatrixContainer& mat, size_type row_ind)
-        :row_ {mat.data_ + mat.row_order_[row_ind] * mat.width_}, col_order_in_row_ {mat.col_order_}
-        {}
-
-        value_type operator[](size_type ind)
-        {
-            return row_[col_order_in_row_[ind]];
-        }
-    };
-
-public:
-    ProxyRow operator[](size_type ind) &
-    {
-        return ProxyRow {*this, ind};
-    }
-
-    ConstProxyRow operator[](size_type ind) const &
-    {
-        return ConstProxyRow {*this, ind};
-    }
-
-    TmpProxyRow operator[](size_type ind) &&
-    {
-        return TmpProxyRow {*this, ind};
     }
 //--------------------------------=| Acces operators end |=---------------------------------------------
 
