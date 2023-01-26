@@ -18,8 +18,8 @@ public:
     using value_type         = T;
     using reference          = T&;
     using const_reference    = const T&;
-    using ArrayIterator      = Container::Array<value_type>::Iterator;
-    using ArrayConstIterator = Container::Array<value_type>::ConstIterator;
+    using ArrayIterator      = typename Container::Array<value_type>::Iterator;
+    using ArrayConstIterator = typename Container::Array<value_type>::ConstIterator;
 
 private:
     size_type height_ = 0, width_ = 0;
@@ -153,6 +153,10 @@ public:
         Container::Array<size_type>& col_order_;
         ArrayIterator                row_itr_;
     public:
+        ProxyRow(Container::Array<size_type>& col_order, ArrayIterator row_itr)
+        :col_order_ {col_order}, row_itr_ {row_itr}
+        {}
+
         reference operator[](size_type index)
         {
             return *(row_itr_ + col_order_[index]);
@@ -161,9 +165,13 @@ public:
 
     class ConstProxyRow
     {
-        Container::Array<size_type>& col_order_;
-        ArrayConstIterator           row_itr_;
+        const Container::Array<size_type>& col_order_;
+        ArrayConstIterator                 row_itr_;
     public:
+        ConstProxyRow(const Container::Array<size_type>& col_order, ArrayConstIterator row_itr)
+        :col_order_ {col_order}, row_itr_ {row_itr}
+        {}
+        
         const_reference operator[](size_type index)
         {
             return *(row_itr_ + col_order_[index]);
@@ -172,17 +180,17 @@ public:
 
     ProxyRow operator[](size_type index) &
     {
-        return ProxyRow{col_order_, data_.begin() + row_order_[index]};
+        return ProxyRow{col_order_, data_.begin() + row_order_[index] * width_};
     }
 
     ConstProxyRow operator[](size_type index) const&
     {
-        return ConstProxyRow{col_order_, data_.cbegin() + row_order_[index]};
+        return ConstProxyRow{col_order_, data_.cbegin() + row_order_[index] * width_};
     }
 
     ConstProxyRow operator[](size_type index) &&
     {
-        return ConstProxyRow{col_order_, data_.cbegin() + row_order_[index]};
+        return ConstProxyRow{col_order_, data_.cbegin() + row_order_[index] * width_};
     }
 //--------------------------------=| Acces operators end |=---------------------------------------------
 
@@ -212,19 +220,348 @@ public:
 //--------------------------------=| Swap rows and columns end |=---------------------------------------
 
 //--------------------------------=| Iterators start |=-------------------------------------------------
-    class Iterator
+    class Iterator 
     {
     public:
         using iterator_category = typename std::random_access_iterator_tag;
         using difference_type   = typename std::ptrdiff_t;
         using value_type        = T;
-        using pointer           = T*;
+        using pointer           = ArrayIterator;
         using reference         = T&;
     private:
+        pointer data_;
         size_type i_, j_;
-        Array
+        size_type width_;
+        Container::Array<size_type>& row_order_;
+        Container::Array<size_type>& col_order_;
+
+        difference_type diff_with_begin() const
+        {
+            return static_cast<difference_type>(i_ * width_ + j_);
+        }
+
+        void convert_from_diff_with_begin(const difference_type& diff)
+        {
+            if (diff < 0)
+                return;
+            i_ = diff / width_;
+            j_ = diff % width_;
+        }
+
+    public:
+        Iterator(MatrixContainer& mat, size_type i, size_type j)
+        :data_ {mat.data_.begin()}, i_ {i}, j_ {j}, width_ {mat.width_}, row_order_ {mat.row_order_}, col_order_ {mat.col_order_}
+        {}
+
+        Iterator() = default;
+
+        reference operator*() const& noexcept
+        {
+            return data_[row_order_[i_] * width_ + col_order_[j_]]; 
+        }
+
+        pointer operator->() const& noexcept
+        {
+            return data_ + row_order_[i_] * width_ + col_order_[j_];
+        }
+
+        Iterator& operator++()
+        {
+            j_++;
+            if (j_ == width_)
+            {
+                j_ = 0;
+                i_++;
+            }
+            return *this;
+        }
+    
+        Iterator operator++(int)
+        {
+            Iterator tmp {*this};
+            ++(*this);
+            return tmp;
+        }
+
+        Iterator& operator--()
+        {
+            if (j_ == 0)
+            {
+                if (i_ == 0)
+                    return *this;
+                else
+                {
+                    i_--;
+                    j_ = width_ - 1;
+                }
+            }
+            j_--;
+            return *this;
+        }
+    
+        Iterator operator--(int)
+        {
+            Iterator tmp {*this};
+            --(*this);
+            return tmp;
+        }
+
+        Iterator& operator+=(const difference_type& rhs)
+        {
+            convert_from_diff_with_begin(diff_with_begin() + rhs);
+            return *this;
+        }
+
+        Iterator& operator-=(const difference_type& rhs)
+        {
+            convert_from_diff_with_begin(diff_with_begin() - rhs);
+            return *this;
+        }
+
+        friend Iterator operator+(const Iterator& itr, const difference_type& diff)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy += diff);
+        }
+
+        friend Iterator operator+(const difference_type& diff, const Iterator& itr)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy += diff);
+        }
+
+        friend Iterator operator-(const Iterator& itr, const difference_type& diff)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy -= diff);
+        }
+
+        friend Iterator operator-(const difference_type& diff, const Iterator& itr)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy -= diff);
+        }
+
+        friend difference_type operator-(const Iterator& lhs, const Iterator& rhs)
+        {
+            return lhs.diff_with_begin() - rhs.diff_with_begin();
+        }
+
+        reference operator[](const difference_type& diff) const
+        {
+            return *(*this + diff);
+        }
+
+        friend bool operator==(const Iterator& lhs, const Iterator& rhs)
+        {
+            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ == rhs.j_;
+        }
+
+        friend bool operator!=(const Iterator& lhs, const Iterator& rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        friend bool operator<(const Iterator& lhs, const Iterator& rhs)
+        {
+            if (lhs.i_ < rhs.i_)
+                return true;
+            else if (lhs.i_ == rhs.i_)
+                return lhs.j_ < rhs.j_;
+            else
+                return false;
+        }
+
+        friend bool operator<=(const Iterator& lhs, const Iterator& rhs)
+        {
+            return (lhs == rhs) || (lhs < rhs);
+        }
+
+        friend bool operator>(const Iterator& lhs, const Iterator& rhs)
+        {
+            return !(lhs <= rhs);
+        }
+
+        friend bool operator>=(const Iterator& lhs, const Iterator& rhs)
+        {
+            return !(lhs < rhs);
+        }
     };
 
+    class ConstIterator 
+    {
+    public:
+        using iterator_category = typename std::random_access_iterator_tag;
+        using difference_type   = typename std::ptrdiff_t;
+        using value_type        = T;
+        using const_pointer     = ArrayConstIterator;
+        using const_reference   = const T&;
+    private:
+        const_pointer data_;
+        size_type i_, j_;
+        size_type width_;
+        Container::Array<size_type>& row_order_;
+        Container::Array<size_type>& col_order_;
+
+        difference_type diff_with_begin() const
+        {
+            return static_cast<difference_type>(i_ * width_ + j_);
+        }
+
+        void convert_from_diff_with_begin(const difference_type& diff)
+        {
+            if (diff < 0)
+                return;
+            i_ = diff / width_;
+            j_ = diff % width_;
+        }
+
+    public:
+        ConstIterator(const MatrixContainer& mat, size_type i, size_type j)
+        :data_ {mat.data_.cbegin()}, i_ {i}, j_ {j}, width_ {mat.width_}, row_order_ {mat.row_order_}, col_order_ {mat.col_order_}
+        {}
+
+        ConstIterator() = default;
+
+        const_reference operator*() const& noexcept
+        {
+            return data_[row_order_[i_] * width_ + col_order_[j_]]; 
+        }
+
+        const_pointer operator->() const& noexcept
+        {
+            return data_ + row_order_[i_] * width_ + col_order_[j_];
+        }
+
+        ConstIterator& operator++()
+        {
+            j_++;
+            if (j_ == width_)
+            {
+                j_ = 0;
+                i_++;
+            }
+            return *this;
+        }
+    
+        ConstIterator operator++(int)
+        {
+            Iterator tmp {*this};
+            ++(*this);
+            return tmp;
+        }
+
+        ConstIterator& operator--()
+        {
+            if (j_ == 0)
+            {
+                if (i_ == 0)
+                    return *this;
+                else
+                {
+                    i_--;
+                    j_ = width_ - 1;
+                }
+            }
+            j_--;
+            return *this;
+        }
+    
+        ConstIterator operator--(int)
+        {
+            Iterator tmp {*this};
+            --(*this);
+            return tmp;
+        }
+
+        ConstIterator& operator+=(const difference_type& rhs)
+        {
+            convert_from_diff_with_begin(diff_with_begin() + rhs);
+            return *this;
+        }
+
+        ConstIterator& operator-=(const difference_type& rhs)
+        {
+            convert_from_diff_with_begin(diff_with_begin() - rhs);
+            return *this;
+        }
+
+        friend ConstIterator operator+(const ConstIterator& itr, const difference_type& diff)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy += diff);
+        }
+
+        friend ConstIterator operator+(const difference_type& diff, const ConstIterator& itr)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy += diff);
+        }
+
+        friend ConstIterator operator-(const ConstIterator& itr, const difference_type& diff)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy -= diff);
+        }
+
+        friend ConstIterator operator-(const difference_type& diff, const ConstIterator& itr)
+        {
+            Iterator itr_cpy {itr};
+            return (itr_cpy -= diff);
+        }
+
+        friend difference_type operator-(const ConstIterator& lhs, const ConstIterator& rhs)
+        {
+            return lhs.diff_with_begin() - rhs.diff_with_begin();
+        }
+
+        const_reference operator[](const difference_type& diff) const
+        {
+            return *(*this + diff);
+        }
+
+        bool operator==(const ConstIterator& rhs) const
+        {
+            return data_ == rhs.data_ && i_ == rhs.i_ && j_ == rhs.j_;
+        }
+
+        bool operator!=(const ConstIterator& rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        bool operator<(const ConstIterator& rhs) const
+        {
+            if (i_ < rhs.i_)
+                return true;
+            else if (i_ == rhs.i_)
+                return j_ < rhs.j_;
+            else
+                return false;
+        }
+
+        bool operator<=(const ConstIterator& rhs) const
+        {
+            return (*this == rhs) || (*this < rhs);
+        }
+
+        bool operator>(const ConstIterator& rhs) const
+        {
+            return !(*this <= rhs);
+        }
+
+        bool operator>=(const ConstIterator& rhs) const
+        {
+            return !(this < rhs);
+        }
+    };
+
+    Iterator begin() & {return Iterator {*this, 0, 0};}
+    Iterator end()   & {return Iterator {*this, height_, 0};}
+    ConstIterator begin() const& {return ConstIterator {*this, 0, 0};}
+    ConstIterator end()   const& {return ConstIterator {*this, height_, 0};}
+    ConstIterator cbegin() const& {return ConstIterator {*this, 0, 0};}
+    ConstIterator cend()   const& {return ConstIterator {*this, height_, 0};}
 //--------------------------------=| Iterators end |=---------------------------------------------------
 };
 

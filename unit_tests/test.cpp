@@ -476,11 +476,11 @@ TEST(Methods, power)
     catch (std::invalid_argument) {std::cerr << "second" << std::endl; throw;}
 }
 
-/*TEST(Iterators, Iterator_and_ConstIterator)
+TEST(Iterators, Iterator_and_ConstIterator)
 {
     EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
     EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
-}*/
+}
 
 
 int main(int argc, char **argv)
