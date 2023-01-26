@@ -246,9 +246,6 @@ public:
         if (base::height() != rhs.height() || base::width() != rhs.width())
             return false;
 
-        if (base::cbegin() == rhs.cbegin())
-            return true;
-
         for (size_t i = 0; i < base::height(); i++)
             for (size_t j = 0; j < base::width(); j++)
                 if (!cmp(base::to(i, j), rhs.to(i, j)))

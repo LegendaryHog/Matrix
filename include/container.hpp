@@ -208,7 +208,7 @@ public:
 
         reference operator[](const difference_type& diff) const
         {
-            return *this + diff;
+            return *(*this + diff);
         }
 
         friend bool operator==(const Iterator& lhs, const Iterator& rhs)
@@ -331,7 +331,7 @@ public:
 
         const_reference operator[](const difference_type& diff) const
         {
-            return *this + diff;
+            return *(*this + diff);
         }
 
         friend bool operator==(const ConstIterator& lhs, const ConstIterator& rhs)

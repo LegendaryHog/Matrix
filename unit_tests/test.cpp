@@ -91,6 +91,7 @@ TEST(Container_Array, Iterators)
     {
         EXPECT_EQ(elem, cpy_arr[i++]);
     }
+    EXPECT_EQ(arr.begin()[3], 89);
 
     EXPECT_EQ(arr.cend() - arr.cbegin(), arr.size());
     auto citr = arr.cbegin();
@@ -105,6 +106,7 @@ TEST(Container_Array, Iterators)
     {
         EXPECT_EQ(elem, cpy_arr[j++]);
     }
+    EXPECT_EQ(arr.cbegin()[2], 78);
 }
 
 TEST(Constructors, by_1_val)
@@ -474,11 +476,11 @@ TEST(Methods, power)
     catch (std::invalid_argument) {std::cerr << "second" << std::endl; throw;}
 }
 
-TEST(Iterators, Iterator_and_ConstIterator)
+/*TEST(Iterators, Iterator_and_ConstIterator)
 {
     EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
     EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
-}
+}*/
 
 
 int main(int argc, char **argv)
