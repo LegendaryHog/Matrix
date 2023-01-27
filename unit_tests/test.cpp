@@ -107,6 +107,13 @@ TEST(Container_Array, Iterators)
         EXPECT_EQ(elem, cpy_arr[j++]);
     }
     EXPECT_EQ(arr.cbegin()[2], 78);
+
+    Container::Array<std::pair<int, int>> arr_p = {{1, 56}, {2, 4}, {31, 3}, {5, 8}, {7, 9}};
+    EXPECT_EQ((arr_p.begin() + 1)->first, 2);
+    EXPECT_EQ((arr_p.end() - 1)->second, 9);
+
+    EXPECT_EQ((arr_p.cbegin() + 1)->first, 2);
+    EXPECT_EQ((arr_p.cend() - 1)->second, 9);
 }
 
 TEST(Constructors, by_1_val)
@@ -478,8 +485,62 @@ TEST(Methods, power)
 
 TEST(Iterators, Iterator_and_ConstIterator)
 {
-    EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
-    EXPECT_TRUE(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
+    static_assert(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
+    static_assert(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
+
+    MatrixArithmetic mat = {{1, 2, 3},
+                            {4, 5, 6},
+                            {7, 8, 9}};
+    mat.swap_col(0, 2);
+    // 3 2 1
+    // 6 5 4 
+    // 9 8 7
+    mat.swap_row(1, 2);
+    // 3 2 1
+    // 9 8 7
+    // 6 5 4
+    
+    Container::Array arr = {3, 2, 1, 9, 8, 7, 6, 5, 4};
+
+    for (auto i = 0; i < 9; i++)
+    {
+        std::cerr << i << ":" << std::endl;
+        EXPECT_EQ(mat.begin()[i], arr[i]);
+        EXPECT_EQ(mat.cbegin()[i], arr[i]);
+    }
+
+    auto itr = mat.begin();
+    auto citr = mat.cbegin();
+
+    itr++;
+    citr++;
+
+    EXPECT_EQ(*itr, 2);
+    EXPECT_EQ(*citr, 2);
+
+    EXPECT_EQ(*(++itr), 1);
+    EXPECT_EQ(*(++citr), 1);
+
+    EXPECT_EQ(itr - 2, mat.begin());
+    EXPECT_EQ(citr - 2, mat.cbegin());
+    EXPECT_GE(itr - 2, mat.begin());
+    EXPECT_GE(citr - 2, mat.cbegin());
+    EXPECT_GE(itr, mat.begin());
+    EXPECT_GE(citr, mat.cbegin());
+    EXPECT_LE(mat.begin(), itr - 2);
+    EXPECT_LE(mat.cbegin(), citr - 2);
+    EXPECT_LE(mat.begin(), itr);
+    EXPECT_LE(mat.cbegin(), citr);
+
+    EXPECT_EQ(mat.end() - mat.begin(), 9);
+    EXPECT_EQ(mat.cend() - mat.cbegin(), 9);
+
+    MatrixArithmetic<std::pair<int, int>> mat_p = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+    EXPECT_EQ((mat_p.begin() + 2)->first, 5);
+    EXPECT_EQ((mat_p.end() - 1)->second, 8);
+
+    EXPECT_EQ((mat_p.cbegin() + 2)->first, 5);
+    EXPECT_EQ((mat_p.cend() - 1)->second, 8);
 }
 
 

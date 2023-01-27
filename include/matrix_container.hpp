@@ -232,8 +232,8 @@ public:
         pointer data_;
         size_type i_, j_;
         size_type width_;
-        Container::Array<size_type>& row_order_;
-        Container::Array<size_type>& col_order_;
+        const Container::Array<size_type>& row_order_;
+        const Container::Array<size_type>& col_order_;
 
         difference_type diff_with_begin() const
         {
@@ -400,8 +400,8 @@ public:
         const_pointer data_;
         size_type i_, j_;
         size_type width_;
-        Container::Array<size_type>& row_order_;
-        Container::Array<size_type>& col_order_;
+        const Container::Array<size_type>& row_order_;
+        const Container::Array<size_type>& col_order_;
 
         difference_type diff_with_begin() const
         {
@@ -446,7 +446,7 @@ public:
     
         ConstIterator operator++(int)
         {
-            Iterator tmp {*this};
+            ConstIterator tmp {*this};
             ++(*this);
             return tmp;
         }
@@ -488,25 +488,25 @@ public:
 
         friend ConstIterator operator+(const ConstIterator& itr, const difference_type& diff)
         {
-            Iterator itr_cpy {itr};
+            ConstIterator itr_cpy {itr};
             return (itr_cpy += diff);
         }
 
         friend ConstIterator operator+(const difference_type& diff, const ConstIterator& itr)
         {
-            Iterator itr_cpy {itr};
+            ConstIterator itr_cpy {itr};
             return (itr_cpy += diff);
         }
 
         friend ConstIterator operator-(const ConstIterator& itr, const difference_type& diff)
         {
-            Iterator itr_cpy {itr};
+            ConstIterator itr_cpy {itr};
             return (itr_cpy -= diff);
         }
 
         friend ConstIterator operator-(const difference_type& diff, const ConstIterator& itr)
         {
-            Iterator itr_cpy {itr};
+            ConstIterator itr_cpy {itr};
             return (itr_cpy -= diff);
         }
 
@@ -552,7 +552,7 @@ public:
 
         bool operator>=(const ConstIterator& rhs) const
         {
-            return !(this < rhs);
+            return !(*this < rhs);
         }
     };
 
