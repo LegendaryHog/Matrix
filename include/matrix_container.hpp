@@ -232,8 +232,8 @@ public:
         pointer data_;
         size_type i_, j_;
         size_type width_;
-        const Container::Array<size_type>& row_order_;
-        const Container::Array<size_type>& col_order_;
+        const Container::Array<size_type>* ptr_row_order_;
+        const Container::Array<size_type>* ptr_col_order_;
 
         difference_type diff_with_begin() const
         {
@@ -250,19 +250,21 @@ public:
 
     public:
         Iterator(MatrixContainer& mat, size_type i, size_type j)
-        :data_ {mat.data_.begin()}, i_ {i}, j_ {j}, width_ {mat.width_}, row_order_ {mat.row_order_}, col_order_ {mat.col_order_}
+        :data_ {mat.data_.begin()}, i_ {i}, j_ {j}, width_ {mat.width_},
+         ptr_row_order_ {&mat.row_order_}, ptr_col_order_ {&mat.col_order_}
         {}
 
-        Iterator() = default;
-
+        Iterator(): data_ (), i_ {0}, j_ {0}, width_ {0}, ptr_row_order_ {nullptr}, ptr_col_order_ {nullptr}
+        {}
+        
         reference operator*() const noexcept
         {
-            return data_[row_order_[i_] * width_ + col_order_[j_]]; 
+            return data_[(*ptr_row_order_)[i_] * width_ + (*ptr_col_order_)[j_]]; 
         }
 
         pointer operator->() const noexcept
         {
-            return data_ + row_order_[i_] * width_ + col_order_[j_];
+            return data_ + (*ptr_row_order_)[i_] * width_ + (*ptr_col_order_)[j_];
         }
 
         Iterator& operator++()
@@ -400,8 +402,8 @@ public:
         const_pointer data_;
         size_type i_, j_;
         size_type width_;
-        const Container::Array<size_type>& row_order_;
-        const Container::Array<size_type>& col_order_;
+        const Container::Array<size_type>* ptr_row_order_;
+        const Container::Array<size_type>* ptr_col_order_;
 
         difference_type diff_with_begin() const
         {
@@ -418,19 +420,21 @@ public:
 
     public:
         ConstIterator(const MatrixContainer& mat, size_type i, size_type j)
-        :data_ {mat.data_.cbegin()}, i_ {i}, j_ {j}, width_ {mat.width_}, row_order_ {mat.row_order_}, col_order_ {mat.col_order_}
+        :data_ {mat.data_.cbegin()}, i_ {i}, j_ {j}, width_ {mat.width_},
+         ptr_row_order_ {&mat.row_order_}, ptr_col_order_ {&mat.col_order_}
         {}
 
-        ConstIterator() = default;
+        ConstIterator(): data_ (), i_ {0}, j_ {0}, width_ {0}, ptr_row_order_ {nullptr}, ptr_col_order_ {nullptr}
+        {}
 
         const_reference operator*() const noexcept
         {
-            return data_[row_order_[i_] * width_ + col_order_[j_]]; 
+            return data_[(*ptr_row_order_)[i_] * width_ + (*ptr_col_order_)[j_]]; 
         }
 
         const_pointer operator->() const noexcept
         {
-            return data_ + row_order_[i_] * width_ + col_order_[j_];
+            return data_ + (*ptr_row_order_)[i_] * width_ + (*ptr_col_order_)[j_];
         }
 
         ConstIterator& operator++()
