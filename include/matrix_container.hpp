@@ -255,12 +255,12 @@ public:
 
         Iterator() = default;
 
-        reference operator*() const& noexcept
+        reference operator*() const noexcept
         {
             return data_[row_order_[i_] * width_ + col_order_[j_]]; 
         }
 
-        pointer operator->() const& noexcept
+        pointer operator->() const noexcept
         {
             return data_ + row_order_[i_] * width_ + col_order_[j_];
         }
@@ -423,12 +423,12 @@ public:
 
         ConstIterator() = default;
 
-        const_reference operator*() const& noexcept
+        const_reference operator*() const noexcept
         {
             return data_[row_order_[i_] * width_ + col_order_[j_]]; 
         }
 
-        const_pointer operator->() const& noexcept
+        const_pointer operator->() const noexcept
         {
             return data_ + row_order_[i_] * width_ + col_order_[j_];
         }

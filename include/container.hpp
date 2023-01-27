@@ -136,8 +136,8 @@ public:
         :ptr_ {ptr}
         {}
 
-        reference operator*()  const& noexcept {return *ptr_;}
-        pointer   operator->() const& noexcept {return ptr_;}
+        reference operator*()  const noexcept {return *ptr_;}
+        pointer   operator->() const noexcept {return ptr_;}
 
         Iterator& operator++()
         {
@@ -259,8 +259,8 @@ public:
         :ptr_ {ptr}
         {}
 
-        const_reference operator*()  const& noexcept {return *ptr_;}
-        const_pointer   operator->() const& noexcept {return ptr_;}
+        const_reference operator*()  const noexcept {return *ptr_;}
+        const_pointer   operator->() const noexcept {return ptr_;}
 
         ConstIterator& operator++()
         {
