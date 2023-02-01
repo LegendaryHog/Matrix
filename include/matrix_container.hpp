@@ -73,7 +73,8 @@ public:
     }
 
     MatrixContainer(value_type val = value_type{})
-    :height_ {1}, width_ {1}, data_ {val} {}
+    :height_ {1}, width_ {1}, data_ {val}
+    {}
 
     MatrixContainer(std::initializer_list<value_type> onedim_list)
     :height_ {onedim_list.size()}, width_ {1}, data_ (height_ * width_)

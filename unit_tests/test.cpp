@@ -465,13 +465,11 @@ TEST(Operators, operator_div)
 TEST(Operators, cast_to_scalar)
 {
     MatrixArithmetic scalar_mat {4};
-    MatrixArithmetic mat (2, 2, 1);
-    auto value_int = 5;
+    MatrixArithmetic mat (2, 2, 1); 
 
-    EXPECT_EQ(scalar_mat + value_int, 9);
-    EXPECT_EQ(value_int + scalar_mat, 9);
-    EXPECT_THROW(value_int = mat + 5, std::invalid_argument);
-    EXPECT_THROW(value_int = 5 + mat, std::invalid_argument);
+    EXPECT_EQ(scalar_cast(scalar_mat) + 5, 9);
+    EXPECT_EQ(scalar_cast(MatrixArithmetic<int>(5) + scalar_mat), 9);  
+    EXPECT_THROW(scalar_cast(mat) + 5, std::invalid_argument);
 }
 
 TEST(Methods, power)

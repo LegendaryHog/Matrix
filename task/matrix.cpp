@@ -18,11 +18,18 @@ int main()
     std::cin >> mat_height;
     std::size_t mat_sz = mat_height * mat_height;
 
-    std::vector<double> mat_data (mat_sz);
-    for (auto& elem: mat_data)
+    try
+    {
+        std::vector<double> mat_data (mat_sz);
+        for (auto& elem: mat_data)
         std::cin >> elem;
 
-    MatrixT matrix {MatrixT::square(mat_height, mat_data.cbegin(), mat_data.cend())};
-    std::cout << matrix.determinant() << std::endl;
+        MatrixT matrix {MatrixT::square(mat_height, mat_data.cbegin(), mat_data.cend())};
+        std::cout << matrix.determinant() << std::endl;
+    }
+    catch (std::bad_alloc)
+    {
+        std::cout << "Bad size" << std::endl;
+    }
     return 0;
 }

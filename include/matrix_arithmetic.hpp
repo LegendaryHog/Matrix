@@ -68,15 +68,6 @@ public:
     bool is_square() const {return base::height() == base::width();}
 //--------------------------------=| Types end |=-------------------------------------------------------
 
-//--------------------------------=| Static cast start |=-----------------------------------------------
-    operator value_type() const
-    {
-        if (!is_scalar())
-            throw std::invalid_argument{"Try to cast MatrixArithmetic in value_type, but matrix isnt scalar"};
-        return base::to(0, 0);
-    }
-//--------------------------------=| Static cast end |=-------------------------------------------------
-
 //--------------------------------=| Algorithm fucntions start |=---------------------------------------
 protected:
     size_type row_with_max_fst(size_type iteration)
@@ -383,7 +374,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
     if (lhs.is_scalar())
     {
         MatrixArithmetic res {rhs};
-        const T& scalar = lhs;
+        const T& scalar = scalar_cast(lhs);
         for (auto elem: res)
             elem *= scalar;
         return res;
@@ -391,7 +382,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
     if (rhs.is_scalar())
     {
         MatrixArithmetic res {lhs};
-        const T& scalar = rhs;
+        const T& scalar = scalar_cast(rhs);
         for (auto elem: res)
             elem *= scalar;
         return res;
@@ -479,4 +470,13 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator/(const MatrixArithmetic<T, I
 }
 //--------------------------------=| Arrithmetical operators end |=-------------------------------------
 
+//--------------------------------=| Cast to scalar start |=--------------------------------------------
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = DefaultAbs__<T>>
+T scalar_cast(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
+{
+    if (!mat.is_scalar())
+        throw std::invalid_argument{"Try to cast MatrixArithmetic in value_type, but matrix isnt scalar"};
+    return mat.to(0, 0);
+}
+//--------------------------------=| Cast to scalar end |=----------------------------------------------
 } //Matrix
