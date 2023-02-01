@@ -469,7 +469,7 @@ TEST(Operators, cast_to_scalar)
 
     EXPECT_EQ(scalar_cast(scalar_mat) + 5, 9);
     EXPECT_EQ(scalar_cast(MatrixArithmetic<int>(5) + scalar_mat), 9);  
-    EXPECT_THROW(scalar_cast(mat) + 5, std::invalid_argument);
+    EXPECT_THROW(auto var = scalar_cast(mat) + 5, std::invalid_argument);
 }
 
 TEST(Methods, power)
