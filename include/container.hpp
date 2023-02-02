@@ -1,9 +1,9 @@
 #pragma once
 #include <initializer_list>
 #include <iostream>
-#include <iterator>
 #include <stdexcept>
 #include <algorithm>
+#include "container_iterator.hpp"
 
 namespace Container
 {
@@ -23,7 +23,7 @@ class Array
 
 //-------------------------------=| Ctors start |=------------------------------------
 public:
-    Array(size_type size = 0)
+    explicit Array(size_type size = 0)
     :size_ {size}, data_ {new value_type[size_]{}}
     {}
 
@@ -118,255 +118,10 @@ public:
     }
 //-------------------------------=| Acces op end |=-----------------------------------
 
-//-------------------------------=| Iterator start |=---------------------------------
-    class Iterator
-    {
-    public:
-        using iterator_category = typename std::random_access_iterator_tag;
-        using difference_type   = typename std::ptrdiff_t;
-        using value_type        = T;
-        using pointer           = T*;
-        using reference         = T&;
-
-    private:
-        pointer ptr_;
-    
-    public:
-        Iterator(pointer ptr = nullptr)
-        :ptr_ {ptr}
-        {}
-
-        reference operator*()  const noexcept {return *ptr_;}
-        pointer   operator->() const noexcept {return ptr_;}
-
-        Iterator& operator++()
-        {
-            ptr_++;
-            return *this;
-        }
-
-        Iterator operator++(int)
-        {
-            Iterator tmp {*this};
-            ++(*this);
-            return tmp;
-        }
-        
-        Iterator& operator--()
-        {
-            ptr_--;
-            return *this;
-        }
-
-        Iterator operator--(int)
-        {
-            Iterator tmp {*this};
-            --(*this);
-            return tmp;
-        }
-
-        Iterator& operator+=(const difference_type& rhs)
-        {
-            ptr_ += rhs;
-            return *this;
-        }
-
-        Iterator& operator-=(const difference_type& rhs)
-        {
-            ptr_ -= rhs;
-            return *this;
-        }
-
-        friend Iterator operator+(const Iterator& itr, const difference_type& diff)
-        {
-            Iterator itr_cpy {itr};
-            return (itr_cpy += diff);
-        }
-
-        friend Iterator operator+(const difference_type& diff, const Iterator& itr)
-        {
-            Iterator itr_cpy {itr};
-            return (itr_cpy += diff);
-        }
-
-        friend Iterator operator-(const Iterator& itr, const difference_type& diff)
-        {
-            Iterator itr_cpy {itr};
-            return (itr_cpy -= diff);
-        }
-
-        friend Iterator operator-(const difference_type& diff, const Iterator& itr)
-        {
-            Iterator itr_cpy {itr};
-            return (itr_cpy -= diff);
-        }
-
-        friend difference_type operator-(const Iterator& lhs, const Iterator& rhs)
-        {
-            return lhs.ptr_ - rhs.ptr_;
-        }
-
-        reference operator[](const difference_type& diff) const
-        {
-            return *(*this + diff);
-        }
-
-        friend bool operator==(const Iterator& lhs, const Iterator& rhs)
-        {
-            return lhs.ptr_ == rhs.ptr_;
-        }
-
-        friend bool operator!=(const Iterator& lhs, const Iterator& rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-        friend bool operator<(const Iterator& lhs, const Iterator& rhs)
-        {
-            return lhs.ptr_ < rhs.ptr_;
-        }
-
-        friend bool operator<=(const Iterator& lhs, const Iterator& rhs)
-        {
-            return (lhs == rhs) || (lhs < rhs);
-        }
-
-        friend bool operator>(const Iterator& lhs, const Iterator& rhs)
-        {
-            return !(lhs <= rhs);
-        }
-
-        friend bool operator>=(const Iterator& lhs, const Iterator& rhs)
-        {
-            return !(lhs < rhs);
-        }
-    }; // Iterator
-
-    class ConstIterator
-    {
-    public:
-        using iterator_category = typename std::random_access_iterator_tag;
-        using difference_type   = typename std::ptrdiff_t;
-        using value_type        = T;
-        using const_pointer     = const T*;
-        using const_reference   = const T&;
-
-    private:
-        const_pointer ptr_;
-    
-    public:
-        ConstIterator(const_pointer ptr = nullptr)
-        :ptr_ {ptr}
-        {}
-
-        const_reference operator*()  const noexcept {return *ptr_;}
-        const_pointer   operator->() const noexcept {return ptr_;}
-
-        ConstIterator& operator++()
-        {
-            ptr_++;
-            return *this;
-        }
-
-        ConstIterator operator++(int)
-        {
-            ConstIterator tmp {*this};
-            ++(*this);
-            return tmp;
-        }
-        
-        ConstIterator& operator--()
-        {
-            ptr_--;
-            return *this;
-        }
-
-        ConstIterator operator--(int)
-        {
-            ConstIterator tmp {*this};
-            --(*this);
-            return tmp;
-        }
-
-        ConstIterator& operator+=(const difference_type& rhs)
-        {
-            ptr_ += rhs;
-            return *this;
-        }
-
-        ConstIterator& operator-=(const difference_type& rhs)
-        {
-            ptr_ -= rhs;
-            return *this;
-        }
-
-        friend ConstIterator operator+(const ConstIterator& itr, const difference_type& diff)
-        {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy += diff);
-        }
-
-        friend ConstIterator operator+(const difference_type& diff, const ConstIterator& itr)
-        {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy += diff);
-        }
-
-        friend ConstIterator operator-(const ConstIterator& itr, const difference_type& diff)
-        {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy -= diff);
-        }
-
-        friend ConstIterator operator-(const difference_type& diff, const ConstIterator& itr)
-        {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy -= diff);
-        }
-
-        friend difference_type operator-(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return lhs.ptr_ - rhs.ptr_;
-        }
-
-        const_reference operator[](const difference_type& diff) const
-        {
-            return *(*this + diff);
-        }
-
-        friend bool operator==(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return lhs.ptr_ == rhs.ptr_;
-        }
-
-        friend bool operator!=(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-        friend bool operator<(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return lhs.ptr_ < rhs.ptr_;
-        }
-
-        friend bool operator<=(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return (lhs == rhs) || (lhs < rhs);
-        }
-
-        friend bool operator>(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return !(lhs <= rhs);
-        }
-
-        friend bool operator>=(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return !(lhs < rhs);
-        }
-    }; // ConstIterator
-//-------------------------------=| Iterator end |=-----------------------------------
-
 //-------------------------------=| begin/end start|=---------------------------------
+using Iterator =      ArrayIterator<T>;
+using ConstIterator = ArrayConstIterator<T>;
+
 Iterator begin() & {return Iterator{data_};}
 Iterator end()   & {return Iterator{data_ + size_};}
 

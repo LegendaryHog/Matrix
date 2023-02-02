@@ -72,8 +72,8 @@ TEST(Container_Array, ctor_size_acces_opers_big_five)
 
 TEST(Container_Array, Iterators)
 {
-    static_assert(std::random_access_iterator<Container::Array<>::Iterator>);
-    static_assert(std::random_access_iterator<Container::Array<>::ConstIterator>);
+    static_assert(std::contiguous_iterator<Container::Array<>::Iterator>);
+    static_assert(std::contiguous_iterator<Container::Array<>::ConstIterator>);
 
     Container::Array<int> arr {23, 46, 78, 89, 90};
     std::array<int, 5> cpy_arr {23, 46, 78, 89, 90};
@@ -157,7 +157,7 @@ TEST(Constructors, by_conteiner)
     #endif
 }
 
-TEST(Constructors, _1x1_by_val_and_one_dim_list)
+TEST(Constructors, 1x1_by_val_and_one_dim_list)
 {
     MatrixArithmetic<int> mat1 {2};
     MatrixArithmetic<int> mat2 (3);
@@ -263,8 +263,8 @@ TEST(Methods, operator_eq)
 {
     MatrixArithmetic<int> mat1 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
     MatrixArithmetic<int> mat2 = {{1, 1, 2}, {23, 56, 78}, {24, 7, -9}};
-    MatrixArithmetic<int> mat3 = MatrixArithmetic<int>::square(3, 1);
-    MatrixArithmetic<int> mat4 = MatrixArithmetic<int>::diag(2, -7);
+    MatrixArithmetic mat3 = MatrixArithmetic<int>::square(3, 1);
+    MatrixArithmetic mat4 = MatrixArithmetic<int>::diag(2, -7);
 
     EXPECT_TRUE(mat1 == mat1);
     EXPECT_TRUE(mat2 == mat2);
@@ -414,7 +414,7 @@ TEST(Methods, det_for_other)
     EXPECT_EQ(mat10.rang(), 3);
 }*/
 
-TEST(Operators, _operator_plus_)
+TEST(Operators, operator_plus_)
 {
     MatrixArithmetic lhs1 = {{12, -3, 4}, {31, -5, 8}};
     MatrixArithmetic rhs1 = {{1, 0, 3}, {12, 3, 4}};

@@ -22,7 +22,7 @@ int main()
     {
         std::vector<double> mat_data (mat_sz);
         for (auto& elem: mat_data)
-        std::cin >> elem;
+            std::cin >> elem;
 
         MatrixT matrix {MatrixT::square(mat_height, mat_data.cbegin(), mat_data.cend())};
         std::cout << matrix.determinant() << std::endl;
