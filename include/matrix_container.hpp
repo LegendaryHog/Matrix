@@ -321,33 +321,24 @@ public:
             return *this;
         }
 
-        friend Iterator operator+(const Iterator& itr, const difference_type& diff)
+        Iterator operator+(const difference_type& diff) const
         {
-            Iterator itr_cpy {itr};
-            return (itr_cpy += diff);
+            return (Iterator{*this} += diff);
         }
 
         friend Iterator operator+(const difference_type& diff, const Iterator& itr)
         {
-            Iterator itr_cpy {itr};
-            return (itr_cpy += diff);
+            return (Iterator{itr} += diff);
         }
 
-        friend Iterator operator-(const Iterator& itr, const difference_type& diff)
+        Iterator operator-(const difference_type& diff) const
         {
-            Iterator itr_cpy {itr};
-            return (itr_cpy -= diff);
+            return (Iterator{*this} -= diff);
         }
 
-        friend Iterator operator-(const difference_type& diff, const Iterator& itr)
+        difference_type operator-(const Iterator& itr) const
         {
-            Iterator itr_cpy {itr};
-            return (itr_cpy -= diff);
-        }
-
-        friend difference_type operator-(const Iterator& lhs, const Iterator& rhs)
-        {
-            return lhs.diff_with_begin() - rhs.diff_with_begin();
+            return diff_with_begin() - itr.diff_with_begin();
         }
 
         reference operator[](const difference_type& diff) const
@@ -355,41 +346,13 @@ public:
             return *(*this + diff);
         }
 
-        friend bool operator==(const Iterator& lhs, const Iterator& rhs)
+        std::strong_ordering operator<=>(const Iterator& itr) const
         {
-            return lhs.data_ == rhs.data_ && lhs.i_ == rhs.i_ && lhs.j_ == rhs.j_;
+            return diff_with_begin() <=> itr.diff_with_begin();
         }
 
-        friend bool operator!=(const Iterator& lhs, const Iterator& rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-        friend bool operator<(const Iterator& lhs, const Iterator& rhs)
-        {
-            if (lhs.i_ < rhs.i_)
-                return true;
-            else if (lhs.i_ == rhs.i_)
-                return lhs.j_ < rhs.j_;
-            else
-                return false;
-        }
-
-        friend bool operator<=(const Iterator& lhs, const Iterator& rhs)
-        {
-            return (lhs == rhs) || (lhs < rhs);
-        }
-
-        friend bool operator>(const Iterator& lhs, const Iterator& rhs)
-        {
-            return !(lhs <= rhs);
-        }
-
-        friend bool operator>=(const Iterator& lhs, const Iterator& rhs)
-        {
-            return !(lhs < rhs);
-        }
-    };
+        bool operator==(const Iterator& itr) const = default;
+    }; // class Iterator
 
     class ConstIterator 
     {
@@ -491,33 +454,24 @@ public:
             return *this;
         }
 
-        friend ConstIterator operator+(const ConstIterator& itr, const difference_type& diff)
+        ConstIterator operator+(const difference_type& diff) const
         {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy += diff);
+            return (ConstIterator{*this} += diff);
         }
 
         friend ConstIterator operator+(const difference_type& diff, const ConstIterator& itr)
         {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy += diff);
+            return (ConstIterator{itr} += diff);
         }
 
-        friend ConstIterator operator-(const ConstIterator& itr, const difference_type& diff)
+        ConstIterator operator-(const difference_type& diff) const
         {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy -= diff);
+            return (ConstIterator{*this} -= diff);
         }
 
-        friend ConstIterator operator-(const difference_type& diff, const ConstIterator& itr)
+        difference_type operator-(const ConstIterator& itr) const
         {
-            ConstIterator itr_cpy {itr};
-            return (itr_cpy -= diff);
-        }
-
-        friend difference_type operator-(const ConstIterator& lhs, const ConstIterator& rhs)
-        {
-            return lhs.diff_with_begin() - rhs.diff_with_begin();
+            return diff_with_begin() - itr.diff_with_begin();
         }
 
         const_reference operator[](const difference_type& diff) const
@@ -525,46 +479,20 @@ public:
             return *(*this + diff);
         }
 
-        bool operator==(const ConstIterator& rhs) const
+        std::strong_ordering operator<=>(const ConstIterator& itr) const
         {
-            return data_ == rhs.data_ && i_ == rhs.i_ && j_ == rhs.j_;
+            return diff_with_begin() <=> itr.diff_with_begin();
         }
 
-        bool operator!=(const ConstIterator& rhs) const
-        {
-            return !(*this == rhs);
-        }
-
-        bool operator<(const ConstIterator& rhs) const
-        {
-            if (i_ < rhs.i_)
-                return true;
-            else if (i_ == rhs.i_)
-                return j_ < rhs.j_;
-            else
-                return false;
-        }
-
-        bool operator<=(const ConstIterator& rhs) const
-        {
-            return (*this == rhs) || (*this < rhs);
-        }
-
-        bool operator>(const ConstIterator& rhs) const
-        {
-            return !(*this <= rhs);
-        }
-
-        bool operator>=(const ConstIterator& rhs) const
-        {
-            return !(*this < rhs);
-        }
-    };
+        bool operator==(const ConstIterator& rhs) const = default;
+    }; // class ConstIterator
 
     Iterator begin() & {return Iterator {*this, 0, 0};}
     Iterator end()   & {return Iterator {*this, height_, 0};}
+
     ConstIterator begin() const& {return ConstIterator {*this, 0, 0};}
     ConstIterator end()   const& {return ConstIterator {*this, height_, 0};}
+
     ConstIterator cbegin() const& {return ConstIterator {*this, 0, 0};}
     ConstIterator cend()   const& {return ConstIterator {*this, height_, 0};}
 //--------------------------------=| Iterators end |=---------------------------------------------------

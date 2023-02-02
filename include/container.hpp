@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
-#include "container_iterator.hpp"
+#include <iterator>
 
 namespace Container
 {
@@ -119,17 +119,186 @@ public:
 //-------------------------------=| Acces op end |=-----------------------------------
 
 //-------------------------------=| begin/end start|=---------------------------------
-using Iterator =      ArrayIterator<T>;
-using ConstIterator = ArrayConstIterator<T>;
+    class Iterator
+    {
+    public:
+        using iterator_category = typename std::contiguous_iterator_tag;
+        using difference_type   = typename std::ptrdiff_t;
+        using value_type        = T;
+        using pointer           = T*;
+        using reference         = T&;
 
-Iterator begin() & {return Iterator{data_};}
-Iterator end()   & {return Iterator{data_ + size_};}
+    private:
+        pointer ptr_;
+        
+    public:
+        explicit Iterator(pointer ptr = nullptr)
+        :ptr_ {ptr}
+        {}
 
-ConstIterator begin() const& {return ConstIterator{data_};}
-ConstIterator end()   const& {return ConstIterator{data_ + size_};}
+        reference operator*()  const noexcept {return *ptr_;}
+        pointer   operator->() const noexcept {return ptr_;}
 
-ConstIterator cbegin() const& {return ConstIterator{data_};}
-ConstIterator cend()   const& {return ConstIterator{data_ + size_};}
+        Iterator& operator++()
+        {
+            ptr_++;
+            return *this;
+        }
+
+        Iterator operator++(int)
+        {
+            Iterator tmp {*this};
+            ++(*this);
+            return tmp;
+        }
+            
+        Iterator& operator--()
+        {
+            ptr_--;
+            return *this;
+        }
+
+        Iterator operator--(int)
+        {
+            Iterator tmp {*this};
+            --(*this);
+            return tmp;
+        }
+
+        Iterator& operator+=(const difference_type& rhs)
+        {
+            ptr_ += rhs;
+            return *this;
+        }
+
+        Iterator& operator-=(const difference_type& rhs)
+        {
+            ptr_ -= rhs;
+            return *this;
+        }
+
+        reference operator[](const difference_type& diff) const
+        {
+            return *(Iterator{*this} += diff);
+        }
+
+        std::strong_ordering operator<=>(const Iterator& rhs) const = default;
+
+        difference_type operator-(const Iterator& rhs) const
+        {
+            return ptr_ - rhs.ptr_;
+        }
+
+        Iterator operator+(const difference_type& diff) const
+        {
+            return (Iterator{*this} += diff);
+        }
+
+        Iterator operator-(const difference_type& diff) const
+        {
+            return (Iterator{*this} -= diff);
+        }
+
+        friend Iterator operator+(const difference_type& diff, const Iterator& itr)
+        {
+            return itr + diff;
+        }
+    }; //class Iterator
+
+    class ConstIterator
+    {
+    public:
+        using iterator_category = typename std::contiguous_iterator_tag;
+        using difference_type   = typename std::ptrdiff_t;
+        using value_type        = T;
+        using const_pointer     = const T*;
+        using const_reference   = const T&;
+
+    private:
+        const_pointer ptr_;
+
+    public:
+        explicit ConstIterator(const_pointer ptr = nullptr)
+        :ptr_ {ptr}
+        {}
+
+        const_reference operator*()  const noexcept {return *ptr_;}
+        const_pointer   operator->() const noexcept {return ptr_;}
+
+        ConstIterator& operator++()
+        {
+            ptr_++;
+            return *this;
+        }
+
+        ConstIterator operator++(int)
+        {
+            ConstIterator tmp {*this};
+            ++(*this);
+            return tmp;
+        }
+        
+        ConstIterator& operator--()
+        {
+            ptr_--;
+            return *this;
+        }
+
+        ConstIterator operator--(int)
+        {
+            ConstIterator tmp {*this};
+            --(*this);
+            return tmp;
+        }
+
+        ConstIterator& operator+=(const difference_type& rhs)
+        {
+            ptr_ += rhs;
+            return *this;
+        }
+
+        ConstIterator& operator-=(const difference_type& rhs)
+        {
+            ptr_ -= rhs;
+            return *this;
+        }
+
+        const_reference operator[](const difference_type& diff) const
+        {
+            return *(ConstIterator{*this} += diff);
+        }
+
+        std::strong_ordering operator<=>(const ConstIterator& rhs) const = default;
+
+        difference_type operator-(const ConstIterator& rhs) const
+        {
+            return ptr_ - rhs.ptr_;
+        }
+
+        ConstIterator operator+(const difference_type& diff) const
+        {
+            return (ConstIterator{*this} += diff);
+        }
+
+        ConstIterator operator-(const difference_type& diff) const
+        {
+            return (ConstIterator{*this} -= diff);
+        }
+
+        friend ConstIterator operator+(const difference_type& diff, const ConstIterator& itr)
+        {
+            return itr + diff;
+        }
+    }; // class ConstIterator
+
+    Iterator begin() & {return Iterator{data_};}
+    Iterator end()   & {return Iterator{data_ + size_};}
+
+    ConstIterator begin() const& {return ConstIterator{data_};}
+    ConstIterator end()   const& {return ConstIterator{data_ + size_};}
+
+    ConstIterator cbegin() const& {return ConstIterator{data_};}
+    ConstIterator cend()   const& {return ConstIterator{data_ + size_};}
 //-------------------------------=| begin/end end|=-----------------------------------
 }; // Array
 
