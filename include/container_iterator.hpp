@@ -1,3 +1,4 @@
+#pragma once
 #include <iterator>
 
 namespace Container

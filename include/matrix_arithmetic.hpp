@@ -1,3 +1,4 @@
+#pragma once
 #include "matrix_container.hpp"
 
 namespace Matrix
