@@ -122,7 +122,7 @@ public:
     class Iterator
     {
     public:
-        using iterator_category = typename std::contiguous_iterator_tag;
+        using iterator_category = typename std::random_access_iterator_tag;
         using difference_type   = typename std::ptrdiff_t;
         using value_type        = T;
         using pointer           = T*;
@@ -208,7 +208,7 @@ public:
     class ConstIterator
     {
     public:
-        using iterator_category = typename std::contiguous_iterator_tag;
+        using iterator_category = typename std::random_access_iterator_tag;
         using difference_type   = typename std::ptrdiff_t;
         using value_type        = T;
         using const_pointer     = const T*;

@@ -72,8 +72,8 @@ TEST(Container_Array, ctor_size_acces_opers_big_five)
 
 TEST(Container_Array, Iterators)
 {
-    static_assert(std::contiguous_iterator<Container::Array<>::Iterator>);
-    static_assert(std::contiguous_iterator<Container::Array<>::ConstIterator>);
+    static_assert(std::random_access_iterator<Container::Array<>::Iterator>);
+    static_assert(std::random_access_iterator<Container::Array<>::ConstIterator>);
 
     Container::Array<int> arr {23, 46, 78, 89, 90};
     std::array<int, 5> cpy_arr {23, 46, 78, 89, 90};
