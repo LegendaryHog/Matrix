@@ -7,7 +7,7 @@ namespace Matrix
 template<typename T>
 concept is_abs_available = requires(const T& arg) {std::abs(arg);};
 
-namespace Detail
+namespace detail
 {
 template<typename T>
 struct DefaultAbs
@@ -18,7 +18,7 @@ struct DefaultAbs
 
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 /*
  *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * IsDivArithm - is division arritmetical correct.                               |
@@ -346,25 +346,25 @@ public:
 };
 
 //--------------------------------=| Wrappers arounf methods start |=-----------------------------------
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 T determinant(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.determinant();
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 std::pair<bool, MatrixArithmetic<T, IsDivArithm, Cmp, Abs>> inverse_pair(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.inverse_pair();
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> inverse(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.inverse();
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> transpos(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     return mat.transpos();
@@ -372,7 +372,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> transpos(const MatrixArithmetic<T, Is
 //--------------------------------=| Wrappers arounf methods end |=-------------------------------------
 
 //--------------------------------=| Arrithmetical operators start |=-----------------------------------
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     if (lhs.is_scalar())
@@ -404,7 +404,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
     return res; 
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> power(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat, long long pow)
     {
         if (!mat.is_square())
@@ -427,46 +427,46 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> power(const MatrixArithmetic<T, IsDiv
         return res;
     }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 bool operator==(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     return lhs.equal_to(rhs);
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 bool operator!=(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     return !lhs.equal_to(rhs);
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator+(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy += rhs);
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator-(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy -= rhs);
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator*(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const T& rhs)
 {
     MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
     return (lhs_cpy *= rhs);
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator*(const T& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
     return rhs * lhs;
 }
 
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator/(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const T& rhs)
 {
     MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
@@ -475,7 +475,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator/(const MatrixArithmetic<T, I
 //--------------------------------=| Arrithmetical operators end |=-------------------------------------
 
 //--------------------------------=| Cast to scalar start |=--------------------------------------------
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = Detail::DefaultAbs<T>>
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 T scalar_cast(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
 {
     if (!mat.is_scalar())
