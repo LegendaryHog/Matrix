@@ -27,25 +27,17 @@ private:
 
     Container::Array<size_type> init_row_order() const
     {
-        try 
-        {
-            Container::Array<size_type> row_order (height_);
-            for (size_type i = 0; i < height_; i++)
-                row_order[i] = i;
-            return row_order;
-        }
-        catch (std::bad_alloc) {throw;}
+        Container::Array<size_type> row_order (height_);
+        for (size_type i = 0; i < height_; i++)
+            row_order[i] = i;
+        return row_order;
     }
     Container::Array<size_type> init_col_order() const
     {
-        try
-        {
-            Container::Array<size_type> col_order (width_);
-            for (size_type i = 0; i < width_; i++)
-                col_order[i] = i;
-            return col_order;
-        }
-        catch(std::bad_alloc) {throw;}
+        Container::Array<size_type> col_order (width_);
+        for (size_type i = 0; i < width_; i++)
+            col_order[i] = i;
+        return col_order;
     }
 
     Container::Array<size_type> row_order_ {init_row_order()};
@@ -56,8 +48,7 @@ public:
     MatrixContainer(size_type h, size_type w, value_type val = value_type{})
     :height_ {h}, width_ {w}, data_ (height_ * width_)
     {
-        for (auto& elem: data_)
-            elem = val;
+        std::fill(data_.begin(), data_.end(), val);
     }
 
     template<std::input_iterator it>

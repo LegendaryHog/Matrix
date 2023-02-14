@@ -8,8 +8,72 @@
 namespace Container
 {
 
+namespace detail
+{
+
+template<typename T>
+void construct(T* p, const T& rhs) {new (p) T{rhs};}
+
+template<typename T>
+void construct(T* p, T&& rhs) {new (p) T{std::move(rhs)};}
+
+template<class T>
+void destroy(T* p) {p->~T();}
+
+template<std::forward_iterator It>
+void destroy(It first, It last)
+{
+    while (first != last)
+        destroy(&*first++);
+}
+
+template<typename T>
+class ArrayBuf
+{
+    using value_type = T;
+    using pointer    = T*;
+    using size_type  = typename std::size_t;
+protected:
+    size_type size_ = 0;
+    pointer data_   = nullptr;
+
+protected:
+    ArrayBuf(size_type size)
+    :size_ {size},
+     data_ {(size_ == 0) ? nullptr : static_cast<pointer>(::operator new(sizeof(value_type) * size_))}
+    {}
+
+    ArrayBuf(const ArrayBuf&)            = delete;
+    ArrayBuf& operator=(const ArrayBuf&) = delete;
+
+    void swap(ArrayBuf& rhs) noexcept
+    {
+        std::swap(size_, rhs.size_);
+        std::swap(data_, rhs.data_);
+    }
+
+    ArrayBuf(ArrayBuf&& rhs) noexcept
+    {
+        swap(rhs);
+    }
+
+    ArrayBuf& operator=(ArrayBuf&& rhs) noexcept
+    {
+        swap(rhs);
+        return *this;
+    }
+
+    virtual ~ArrayBuf()
+    {
+        destroy(data_, data_ + size_);
+        ::operator delete(data_);
+    }
+};
+
+}
+
 template<typename T = int>
-class Array
+class Array final
 {
     using size_type       = typename std::size_t;
     using value_type      = T;
@@ -27,20 +91,10 @@ public:
     :size_ {size}, data_ {new value_type[size_]{}}
     {}
 
-private:
-    // sub func
-    template<std::input_iterator it>
-    size_type calc_size(it begin, it end)
-    {
-        size_type size = 0;
-        for (it itr = begin; itr != end; ++itr, size++) {}
-        return size;
-    }
-
 public:
     template<std::input_iterator it>
     Array(it begin, it end)
-    :size_ {calc_size(begin, end)}, data_ {new value_type[size_]}
+    :size_ {std::distance(begin, end)}, data_ {new value_type[size_]}
     {
         std::copy(begin, end, data_);
     }
@@ -85,7 +139,7 @@ public:
         return *this;
     }
 
-    virtual ~Array()
+    ~Array()
     {
         delete[] data_;
     }
@@ -94,9 +148,9 @@ public:
 //-------------------------------=| Acces op start |=---------------------------------
     size_type size() const noexcept {return size_;}
 
-    reference       operator[](size_type index) & noexcept      {return data_[index];}
+    reference       operator[](size_type index) &      noexcept {return data_[index];}
     const_reference operator[](size_type index) const& noexcept {return data_[index];}
-    value_type      operator[](size_type index) && noexcept     {return data_[index];}
+    value_type      operator[](size_type index) &&     noexcept {return data_[index];}
 
     reference at(size_type index) &  
     {
