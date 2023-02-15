@@ -478,14 +478,14 @@ public:
         bool operator==(const ConstIterator& rhs) const = default;
     }; // class ConstIterator
 
-    Iterator begin() & {return Iterator {*this, 0, 0};}
-    Iterator end()   & {return Iterator {*this, height_, 0};}
+    Iterator begin() noexcept {return Iterator {*this, 0, 0};}
+    Iterator end()   noexcept {return Iterator {*this, height_, 0};}
 
-    ConstIterator begin() const& {return ConstIterator {*this, 0, 0};}
-    ConstIterator end()   const& {return ConstIterator {*this, height_, 0};}
+    ConstIterator begin() const noexcept {return ConstIterator {*this, 0, 0};}
+    ConstIterator end()   const noexcept {return ConstIterator {*this, height_, 0};}
 
-    ConstIterator cbegin() const& {return ConstIterator {*this, 0, 0};}
-    ConstIterator cend()   const& {return ConstIterator {*this, height_, 0};}
+    ConstIterator cbegin() const noexcept {return ConstIterator {*this, 0, 0};}
+    ConstIterator cend()   const noexcept {return ConstIterator {*this, height_, 0};}
 //--------------------------------=| Iterators end |=---------------------------------------------------
 };
 

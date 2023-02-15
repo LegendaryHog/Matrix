@@ -70,10 +70,10 @@ protected:
     }
 };
 
-}
+} // namespace detail
 
 template<typename T = int>
-class Array final
+class Array final : private detail::ArrayBuf<T>
 {
     using size_type       = typename std::size_t;
     using value_type      = T;
@@ -81,68 +81,49 @@ class Array final
     using const_pointer   = const T*;
     using reference       = T&;
     using const_reference = const T&;
+    using base            = detail::ArrayBuf<T>;
 
-    size_type size_ = 0;
-    pointer   data_ = nullptr; 
+    using base::data_;
+    using base::size_;
 
 //-------------------------------=| Ctors start |=------------------------------------
 public:
-    explicit Array(size_type size = 0)
-    :size_ {size}, data_ {new value_type[size_]{}}
-    {}
+    Array(size_type size = 0): base::ArrayBuf(size) {}
 
-public:
-    template<std::input_iterator it>
-    Array(it begin, it end)
-    :size_ {std::distance(begin, end)}, data_ {new value_type[size_]}
+    template<std::input_iterator It>
+    Array(It begin, It end): base::ArrayBuf(std::distance(begin, end))
     {
-        std::copy(begin, end, data_);
+        for (size_type i = 0; i < size_; i++, begin++)
+            detail::construct(data_ + i, *begin);
     }
 
-    Array(std::initializer_list<T> list)
-    :size_ {list.size()}, data_ {new value_type[size_]}
+    Array(std::initializer_list<T> initlist): base::ArrayBuf(initlist.size())
     {
-        std::copy(list.begin(), list.end(), data_);
+        size_type i = 0;
+        for (auto elem: initlist)
+            detail::construct(data_ + i++, elem);
     }
 //-------------------------------=| Ctors end |=--------------------------------------
 
 //-------------------------------=| Big five start |=---------------------------------
-private:
-    void swap(Array& arr) noexcept
-    {
-        std::swap(data_, arr.data_);
-        std::swap(size_, arr.size_);
-    }
-
 public:
-    Array(const Array& rhs)
-    :size_ {rhs.size_}, data_ {new value_type[size_]}
-    {
-        std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
-    }
+    Array(Array&&)            = default;
+    Array& operator=(Array&&) = default;
 
-    Array(Array&& rhs) noexcept
+    Array(const Array& rhs): base::ArrayBuf(rhs.size_)
     {
-        swap(rhs);
+        for (size_type i = 0; i < size_; i++)
+            detail::construct(data_ + i, rhs.data_[i]);
     }
 
     Array& operator=(const Array& rhs)
     {
-        Array rhs_cpy {rhs};
-        swap(rhs_cpy);
+        auto cpy {rhs};
+        std::swap(*this, cpy);
         return *this;
     }
 
-    Array& operator=(Array&& rhs) noexcept
-    {
-        swap(rhs);
-        return *this;
-    }
-
-    ~Array()
-    {
-        delete[] data_;
-    }
+    ~Array() = default;
 //-------------------------------=| Big five end |=-----------------------------------
 
 //-------------------------------=| Acces op start |=---------------------------------
@@ -345,14 +326,14 @@ public:
         }
     }; // class ConstIterator
 
-    Iterator begin() & {return Iterator{data_};}
-    Iterator end()   & {return Iterator{data_ + size_};}
+    Iterator begin() {return Iterator{data_};}
+    Iterator end()   {return Iterator{data_ + size_};}
 
-    ConstIterator begin() const& {return ConstIterator{data_};}
-    ConstIterator end()   const& {return ConstIterator{data_ + size_};}
+    ConstIterator begin() const {return ConstIterator{data_};}
+    ConstIterator end()   const {return ConstIterator{data_ + size_};}
 
-    ConstIterator cbegin() const& {return ConstIterator{data_};}
-    ConstIterator cend()   const& {return ConstIterator{data_ + size_};}
+    ConstIterator cbegin() const {return ConstIterator{data_};}
+    ConstIterator cend()   const {return ConstIterator{data_ + size_};}
 //-------------------------------=| begin/end end|=-----------------------------------
 }; // Array
 
