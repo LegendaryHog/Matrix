@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
-#include <iterator>
+#include "contiguous_iterator.hpp"
 
 namespace Container
 {
@@ -65,7 +65,6 @@ protected:
 
     virtual ~ArrayBuf()
     {
-        destroy(data_, data_ + size_);
         ::operator delete(data_);
     }
 };
@@ -83,17 +82,20 @@ class Array final : private detail::ArrayBuf<T>
     using const_reference = const T&;
     using base            = detail::ArrayBuf<T>;
 
-    using base::data_;
     using base::size_;
-
+    using base::data_;
 //-------------------------------=| Ctors start |=------------------------------------
 public:
-    Array(size_type size = 0): base::ArrayBuf(size) {}
+    Array(size_type size = 0): base::ArrayBuf(size)
+    {
+        for (size_type i = 0; i < size_; i++)
+            detail::construct(data_ + i, value_type{});
+    }
 
     template<std::input_iterator It>
     Array(It begin, It end): base::ArrayBuf(std::distance(begin, end))
     {
-        for (size_type i = 0; i < size_; i++, begin++)
+        for (size_type i = 0; i < size_; i++, ++begin)
             detail::construct(data_ + i, *begin);
     }
 
@@ -123,11 +125,14 @@ public:
         return *this;
     }
 
-    ~Array() = default;
+    ~Array()
+    {
+        detail::destroy(data_, data_ + size_);
+    }
 //-------------------------------=| Big five end |=-----------------------------------
 
 //-------------------------------=| Acces op start |=---------------------------------
-    size_type size() const noexcept {return size_;}
+    size_type size() const {return size_;}
 
     reference       operator[](size_type index) &      noexcept {return data_[index];}
     const_reference operator[](size_type index) const& noexcept {return data_[index];}
@@ -154,177 +159,8 @@ public:
 //-------------------------------=| Acces op end |=-----------------------------------
 
 //-------------------------------=| begin/end start|=---------------------------------
-    class Iterator
-    {
-    public:
-        using iterator_category = typename std::random_access_iterator_tag;
-        using difference_type   = typename std::ptrdiff_t;
-        using value_type        = T;
-        using pointer           = T*;
-        using reference         = T&;
-
-    private:
-        pointer ptr_;
-        
-    public:
-        explicit Iterator(pointer ptr = nullptr)
-        :ptr_ {ptr}
-        {}
-
-        reference operator*()  const noexcept {return *ptr_;}
-        pointer   operator->() const noexcept {return ptr_;}
-
-        Iterator& operator++()
-        {
-            ptr_++;
-            return *this;
-        }
-
-        Iterator operator++(int)
-        {
-            Iterator tmp {*this};
-            ++(*this);
-            return tmp;
-        }
-            
-        Iterator& operator--()
-        {
-            ptr_--;
-            return *this;
-        }
-
-        Iterator operator--(int)
-        {
-            Iterator tmp {*this};
-            --(*this);
-            return tmp;
-        }
-
-        Iterator& operator+=(const difference_type& rhs)
-        {
-            ptr_ += rhs;
-            return *this;
-        }
-
-        Iterator& operator-=(const difference_type& rhs)
-        {
-            ptr_ -= rhs;
-            return *this;
-        }
-
-        reference operator[](const difference_type& diff) const
-        {
-            return *(Iterator{*this} += diff);
-        }
-
-        std::strong_ordering operator<=>(const Iterator& rhs) const = default;
-
-        difference_type operator-(const Iterator& rhs) const
-        {
-            return ptr_ - rhs.ptr_;
-        }
-
-        Iterator operator+(const difference_type& diff) const
-        {
-            return (Iterator{*this} += diff);
-        }
-
-        Iterator operator-(const difference_type& diff) const
-        {
-            return (Iterator{*this} -= diff);
-        }
-
-        friend Iterator operator+(const difference_type& diff, const Iterator& itr)
-        {
-            return itr + diff;
-        }
-    }; //class Iterator
-
-    class ConstIterator
-    {
-    public:
-        using iterator_category = typename std::random_access_iterator_tag;
-        using difference_type   = typename std::ptrdiff_t;
-        using value_type        = T;
-        using const_pointer     = const T*;
-        using const_reference   = const T&;
-
-    private:
-        const_pointer ptr_;
-
-    public:
-        explicit ConstIterator(const_pointer ptr = nullptr)
-        :ptr_ {ptr}
-        {}
-
-        const_reference operator*()  const noexcept {return *ptr_;}
-        const_pointer   operator->() const noexcept {return ptr_;}
-
-        ConstIterator& operator++()
-        {
-            ptr_++;
-            return *this;
-        }
-
-        ConstIterator operator++(int)
-        {
-            ConstIterator tmp {*this};
-            ++(*this);
-            return tmp;
-        }
-        
-        ConstIterator& operator--()
-        {
-            ptr_--;
-            return *this;
-        }
-
-        ConstIterator operator--(int)
-        {
-            ConstIterator tmp {*this};
-            --(*this);
-            return tmp;
-        }
-
-        ConstIterator& operator+=(const difference_type& rhs)
-        {
-            ptr_ += rhs;
-            return *this;
-        }
-
-        ConstIterator& operator-=(const difference_type& rhs)
-        {
-            ptr_ -= rhs;
-            return *this;
-        }
-
-        const_reference operator[](const difference_type& diff) const
-        {
-            return *(ConstIterator{*this} += diff);
-        }
-
-        std::strong_ordering operator<=>(const ConstIterator& rhs) const = default;
-
-        difference_type operator-(const ConstIterator& rhs) const
-        {
-            return ptr_ - rhs.ptr_;
-        }
-
-        ConstIterator operator+(const difference_type& diff) const
-        {
-            return (ConstIterator{*this} += diff);
-        }
-
-        ConstIterator operator-(const difference_type& diff) const
-        {
-            return (ConstIterator{*this} -= diff);
-        }
-
-        friend ConstIterator operator+(const difference_type& diff, const ConstIterator& itr)
-        {
-            return itr + diff;
-        }
-    }; // class ConstIterator
+    using Iterator      = typename detail::ContiguousIterator<value_type>;
+    using ConstIterator = typename detail::ContiguousIterator<const value_type>;
 
     Iterator begin() {return Iterator{data_};}
     Iterator end()   {return Iterator{data_ + size_};}
