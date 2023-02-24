@@ -325,7 +325,7 @@ public:
     template<std::input_iterator it>
     static MatrixArithmetic diag(it begin, it end)
     {
-        auto sz = 0;
+        size_type sz = 0;
         for (auto itr = begin; itr != end; ++itr, sz++) {;}
         return diag(sz, begin, end);
     }

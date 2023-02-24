@@ -493,10 +493,10 @@ template<typename value_type = int>
 std::ostream& dump(std::ostream& os, const MatrixContainer<value_type>& mat)
 {
     os << '{';
-    for (auto i = 0; i < mat.height(); i++)
+    for (std::size_t i = 0; i < mat.height(); i++)
     {
         os << '{';
-        for (auto j = 0; j < mat.width() - 1; j++)
+        for (std::size_t j = 0; j < mat.width() - 1; j++)
             os << mat.to(i, j) << ' ';
         os << mat.to(i, mat.width() - 1) << '}';
     }

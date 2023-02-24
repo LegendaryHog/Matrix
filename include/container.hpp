@@ -63,7 +63,7 @@ protected:
         return *this;
     }
 
-    virtual ~ArrayBuf()
+    ~ArrayBuf()
     {
         ::operator delete(data_);
     }
@@ -120,7 +120,7 @@ public:
 
     Array& operator=(const Array& rhs)
     {
-        auto cpy {rhs};
+        Array cpy {rhs};
         std::swap(*this, cpy);
         return *this;
     }
