@@ -7,6 +7,9 @@ import os
 import time
 import math
 
+# path to run file                     - 1 arg
+# names of tests without _mat and _det - other argc
+
 def take_answer(file_name):
     f = open(file_name, "r")
     answer = float(f.read())

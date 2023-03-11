@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-# matrix size       - 1 arg
-# matrix mux num    - 2 arg
-# file name to dump - 3 arg
-
 from io import TextIOWrapper
 from typing import List
 import random, sys
-import os 
+import os
+
+# matrix size       - 1 arg
+# matrix max num    - 2 arg
+# file name to dump - 3 arg
 
 BIG_NUMBER: int = 64
 
