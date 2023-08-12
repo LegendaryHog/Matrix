@@ -15,16 +15,21 @@ template<typename T = int>
 class MatrixContainer
 {
 public:
-    using size_type          = typename std::size_t;
-    using value_type         = T;
-    using reference          = T&;
-    using const_reference    = const T&;
-    using pointer            = T*;
-    using const_pointer      = const T*;
-    using VectorIterator      = typename Container::Vector<value_type>::Iterator;
-    using VectorConstIterator = typename Container::Vector<value_type>::ConstIterator;
-    using Iterator            = typename Container::Vector<Container::Vector<value_type>>::Iterator;
-    using ConstIterator       = typename Container::Vector<Container::Vector<value_type>>::ConstIterator;
+    using size_type        = std::size_t;
+    using value_type       = T;
+    using reference        = T&;
+    using const_reference  = const T&;
+    using pointer          = T*;
+    using const_pointer    = const T*;
+
+    using Row              = typename Container::Vector<value_type>;
+
+    using RowIterator      = typename Row::Iterator;
+    using RowConstIterator = typename Row::ConstIterator;
+    using Iterator         = typename Container::Vector<Row>::Iterator;
+    using ConstIterator    = typename Container::Vector<Row>::ConstIterator;
+    using ReverseIterator  = typename Container::Vector<Row>::ReverseIterator;
+    using ConstReverseIterator = typename Container::Vector<Row>::ConstReverseIterator;
 
 private:
     size_type height_ = 0, width_ = 0;
@@ -33,16 +38,16 @@ private:
 public:
 //--------------------------------=| Classic ctors start |=---------------------------------------------
     MatrixContainer(size_type h, size_type w, const_reference val)
-    :height_ {h}, width_ {w}, data_ (height_, Container::Vector<value_type>(width_, val))
+    :height_ {h}, width_ {w}, data_ (height_, Row(width_, val))
     {}
 
     MatrixContainer(size_type h, size_type w)
-    :height_ {h}, width_ {w}, data_ (height_, Container::Vector<value_type>(width_))
+    :height_ {h}, width_ {w}, data_ (height_, Row(width_))
     {}
 
     template<std::input_iterator it>
     MatrixContainer(size_type h, size_type w, it begin, it end)
-    :height_ {h}, width_ {w}, data_ (height_, Container::Vector<value_type>(width_))
+    :height_ {h}, width_ {w}, data_ (height_, Row(width_))
     {   
         for (auto& row: data_)
             for (auto& elem: row)
@@ -53,11 +58,11 @@ public:
     }
 
     MatrixContainer(value_type val = value_type{})
-    :height_ {1}, width_ {1}, data_ (1, Container::Vector<value_type>{val})
+    :height_ {1}, width_ {1}, data_ (1, Row{val})
     {}
 
     MatrixContainer(std::initializer_list<value_type> onedim_list)
-    :height_ {onedim_list.size()}, width_ {1}, data_ (height_, Container::Vector<value_type>(1))
+    :height_ {onedim_list.size()}, width_ {1}, data_ (height_, Row(1))
     {
         size_type i = 0;
         for (const auto& elem: onedim_list)
@@ -90,17 +95,12 @@ public:
     size_type height() const {return height_;}
     size_type width()  const {return width_;}
 
-    reference to(size_type i, size_type j) & noexcept
+    reference to(size_type i, size_type j) noexcept
     {
         return data_[i][j];
     }
 
-    const_reference to(size_type i, size_type j) const& noexcept
-    {
-        return data_[i][j];
-    }
-
-    value_type to(size_type i, size_type j) && noexcept
+    const_reference to(size_type i, size_type j) const noexcept
     {
         return data_[i][j];
     }
@@ -119,13 +119,8 @@ public:
         return to(i, j);
     }
 
-    value_type at(size_type i, size_type j) &&
-    {
-        if (i >= height_ || j >= width_)
-            throw std::out_of_range{"try to get access to element out of matrix"};
-        return to(i, j);
-    }
-    
+    Row&       operator[](size_type ind)       {return data_[ind];}
+    const Row& operator[](size_type ind) const {return data_[ind];} 
 //--------------------------------=| Acces operators end |=---------------------------------------------
 
 //--------------------------------=| Swap rows and columns start |=-------------------------------------
@@ -133,7 +128,7 @@ public:
  *----------------------------------------------------------------------------*
  *      ________________________________________________________________      *
  *---==| BE CAREFUL, THIS OPERATIONS INVALIDATE ITERATORS AND REFERENCES|==---*
- *      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      *
+ *     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      *
  *----------------------------------------------------------------------------*
  */                              
     void swap_row(size_type ind1, size_type ind2)
@@ -156,14 +151,23 @@ public:
 
 //--------------------------------=| Iterators start |=-------------------------------------------------
 
-    Iterator begin() noexcept {return Iterator {*this, 0, 0};}
-    Iterator end()   noexcept {return Iterator {*this, height_, 0};}
+    Iterator begin() {return data_.begin();}
+    Iterator end()   {return data_.end();}
 
-    ConstIterator begin() const noexcept {return ConstIterator {*this, 0, 0};}
-    ConstIterator end()   const noexcept {return ConstIterator {*this, height_, 0};}
+    ConstIterator begin() const {return data_.cbegin();}
+    ConstIterator end()   const {return data_.cend();}
 
-    ConstIterator cbegin() const noexcept {return ConstIterator {*this, 0, 0};}
-    ConstIterator cend()   const noexcept {return ConstIterator {*this, height_, 0};}
+    ConstIterator cbegin() const {return data_.cbegin();}
+    ConstIterator cend()   const {return data_.cend();}
+
+    ReverseIterator rbegin() {return data_.rbegin();}
+    ReverseIterator rend()   {return data_.rend();}
+
+    ConstReverseIterator rbegin() const {return data_.crbegin();}
+    ConstReverseIterator rend()   const {return data_.crend();}
+
+    ConstReverseIterator crbegin() const {return data_.crbegin();}
+    ConstReverseIterator crend()   const {return data_.crend();}
 //--------------------------------=| Iterators end |=---------------------------------------------------
 };
 

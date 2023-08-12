@@ -38,25 +38,28 @@ class MatrixArithmetic : public MatrixContainer<T>
 
 public:
 //--------------------------------=| Ctors start |=-----------------------------------------------------
-    MatrixArithmetic(size_type h, size_type w, value_type val = value_type{})
-    :base::MatrixContainer(h, w, val)
+    MatrixArithmetic(size_type h, size_type w): base(h, w) {}
+
+    
+    MatrixArithmetic(size_type h, size_type w, typename base::const_reference val)
+    :base(h, w, val)
     {}
 
     template<std::input_iterator it>
     MatrixArithmetic(size_type h, size_type w, it begin, it end)
-    :base::MatrixContainer(h, w, begin, end)
+    :base(h, w, begin, end)
     {}
 
     MatrixArithmetic(value_type val = value_type{})
-    :base::MatrixContainer(val)
+    :base(val)
     {}
 
     MatrixArithmetic(std::initializer_list<value_type> onedim_list)
-    :base::MatrixContainer(onedim_list)
+    :base(onedim_list)
     {}
 
     MatrixArithmetic(std::initializer_list<std::initializer_list<value_type>> twodim_list)
-    :base::MatrixContainer(twodim_list)
+    :base(twodim_list)
     {}
 //--------------------------------=| Ctors end |=-------------------------------------------------------
 
