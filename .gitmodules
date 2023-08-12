@@ -1,0 +1,3 @@
+[submodule "include/Vector"]
+	path = include/Vector
+	url = https://github.com/LegendaryHog/Vector.git
