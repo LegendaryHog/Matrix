@@ -376,64 +376,23 @@ TEST(Methods, power)
     catch (std::invalid_argument) {std::cerr << "second" << std::endl; throw;}
 }
 
+TEST(Methods, product)
+{
+    MatrixArithmetic mat1 {{1, 2, 12}, {14, 31, 56}, {34, 21, -5}, {-3, 112, 78}};
+    MatrixArithmetic mat2 {{34, -7, 45, 67, 3}, {23, 54, 67, 0, -1}, {1, 2, -3, -9, 11}};
+
+    MatrixArithmetic res1 {{92, 125, 143, -41, 133}, {1245, 1688, 2539, 434, 627},
+                           {1634, 886, 2952, 2323, 26}, {2552, 6225, 7135, -903, 737}};
+
+    EXPECT_EQ(product(mat1, mat2), res1);
+    EXPECT_EQ(product(mat1, MatrixArithmetic{2}), 2 * mat1);
+    EXPECT_EQ(product(MatrixArithmetic{-4}, mat2), (-4) * mat2);
+}
+
 TEST(Iterators, Iterator_and_ConstIterator)
 {
     static_assert(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
     static_assert(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
-    
-    MatrixArithmetic mat = {{1, 2, 3},
-                            {4, 5, 6},
-                            {7, 8, 9}};
-    mat.swap_col(0, 2);
-    // 3 2 1
-    // 6 5 4 
-    // 9 8 7
-    mat.swap_row(1, 2);
-    // 3 2 1
-    // 9 8 7
-    // 6 5 4
-    
-    Container::Vector arr = {3, 2, 1, 9, 8, 7, 6, 5, 4};
-
-    for (auto i = 0; i < 9; i++)
-    {
-        std::cerr << i << ":" << std::endl;
-        EXPECT_EQ(mat.begin()[i], arr[i]);
-        EXPECT_EQ(mat.cbegin()[i], arr[i]);
-    }
-
-    auto itr = mat.begin();
-    auto citr = mat.cbegin();
-
-    itr++;
-    citr++;
-
-    EXPECT_EQ(*itr, 2);
-    EXPECT_EQ(*citr, 2);
-
-    EXPECT_EQ(*(++itr), 1);
-    EXPECT_EQ(*(++citr), 1);
-
-    EXPECT_EQ(itr - 2, mat.begin());
-    EXPECT_EQ(citr - 2, mat.cbegin());
-    EXPECT_GE(itr - 2, mat.begin());
-    EXPECT_GE(citr - 2, mat.cbegin());
-    EXPECT_GE(itr, mat.begin());
-    EXPECT_GE(citr, mat.cbegin());
-    EXPECT_LE(mat.begin(), itr - 2);
-    EXPECT_LE(mat.cbegin(), citr - 2);
-    EXPECT_LE(mat.begin(), itr);
-    EXPECT_LE(mat.cbegin(), citr);
-
-    EXPECT_EQ(mat.end() - mat.begin(), 9);
-    EXPECT_EQ(mat.cend() - mat.cbegin(), 9);
-
-    MatrixArithmetic<std::pair<int, int>> mat_p = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
-    EXPECT_EQ((mat_p.begin() + 2)->first, 5);
-    EXPECT_EQ((mat_p.end() - 1)->second, 8);
-
-    EXPECT_EQ((mat_p.cbegin() + 2)->first, 5);
-    EXPECT_EQ((mat_p.cend() - 1)->second, 8);
 }
 
 

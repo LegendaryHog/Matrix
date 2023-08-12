@@ -29,7 +29,7 @@ template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T
 class MatrixArithmetic : public MatrixContainer<T> 
 {
     using base       = MatrixContainer<T>; 
-    using size_type  = typename std::size_t;
+    using size_type  = std::size_t;
     using value_type = T;
     
     static constexpr bool is_div_arithmetical = IsDivArithm;
@@ -290,15 +290,17 @@ public:
 
     MatrixArithmetic& operator*=(const T& rhs)
     {
-        for (auto& elem: *this)
-            elem *= rhs;
+        for (auto& row: *this)
+            for (auto& elem: row)
+                elem *= rhs;
         return *this;
     }
 
     MatrixArithmetic& operator/=(const T& rhs)
     {
-        for (auto& elem: *this)
-            elem /= rhs;
+        for (auto& row: *this)
+            for (auto& elem: row)
+                elem /= rhs;
         return *this;
     }
 //--------------------------------=| Basic arithmetic end |=--------------------------------------------
@@ -382,16 +384,18 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
     {
         MatrixArithmetic res {rhs};
         const T& scalar = scalar_cast(lhs);
-        for (auto elem: res)
-            elem *= scalar;
+        for (auto& row: res)
+            for (auto& elem: row)
+                elem *= scalar;
         return res;
     }
     if (rhs.is_scalar())
     {
         MatrixArithmetic res {lhs};
         const T& scalar = scalar_cast(rhs);
-        for (auto elem: res)
-            elem *= scalar;
+        for (auto& row: res)
+            for (auto& elem: row)
+                elem *= scalar;
         return res;
     }
     if (lhs.width() != rhs.height())
@@ -486,4 +490,4 @@ T scalar_cast(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
     return mat.to(0, 0);
 }
 //--------------------------------=| Cast to scalar end |=----------------------------------------------
-} //Matrix
+} // namespace Matrix

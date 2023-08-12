@@ -87,7 +87,7 @@ public:
     {
         size_type i = 0;
         for (auto& row: twodim_list)
-            std::copy(row.begin(), row.end(), data[i++].begin());
+            std::copy(row.begin(), row.end(), data_[i++].begin());
     }
 //--------------------------------=| Classic ctors end |=-----------------------------------------------
 
