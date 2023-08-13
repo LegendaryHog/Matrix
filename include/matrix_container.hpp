@@ -105,19 +105,8 @@ public:
         return data_[i][j];
     }
 
-    reference at(size_type i, size_type j) &
-    {
-        if (i >= height_ || j >= width_)
-            throw std::out_of_range{"try to get access to element out of matrix"};
-        return to(i, j);
-    }
-
-    const_reference at(size_type i, size_type j) const&
-    {
-        if (i >= height_ || j >= width_)
-            throw std::out_of_range{"try to get access to element out of matrix"};
-        return to(i, j);
-    }
+    Row&       at(size_type ind)       {return data_.at(ind);}
+    const Row& at(size_type ind) const {return data_.at(ind);}
 
     Row&       operator[](size_type ind)       {return data_[ind];}
     const Row& operator[](size_type ind) const {return data_[ind];} 

@@ -1,9 +1,9 @@
 aux_source_directory(. SRC_LIST)
 
-add_executable(test_run ${SRC_LIST})
+add_executable(matrix_test ${SRC_LIST})
 
-target_link_libraries(test_run PRIVATE ${GTEST_LIBRARIES} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(matrix_test PRIVATE ${GTEST_LIBRARIES} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
-target_include_directories(test_run PRIVATE ../include)
+target_include_directories(matrix_test PRIVATE ../include)
 
-gtest_discover_tests(test_run)
+gtest_discover_tests(matrix_test)
