@@ -22,7 +22,7 @@ public:
     using pointer          = T*;
     using const_pointer    = const T*;
 
-    using Row              = typename Container::Vector<value_type>;
+    using Row = typename Container::Vector<value_type>;
 
     using RowIterator      = typename Row::Iterator;
     using RowConstIterator = typename Row::ConstIterator;
@@ -37,6 +37,8 @@ private:
 
 public:
 //--------------------------------=| Classic ctors start |=---------------------------------------------
+    MatrixContainer() = default;
+
     MatrixContainer(size_type h, size_type w, const_reference val)
     :height_ {h}, width_ {w}, data_ (height_, Row(width_, val))
     {}

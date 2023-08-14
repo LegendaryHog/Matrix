@@ -38,9 +38,10 @@ class MatrixArithmetic : public MatrixContainer<T>
 
 public:
 //--------------------------------=| Ctors start |=-----------------------------------------------------
+    MatrixArithmetic(): base() {}
+
     MatrixArithmetic(size_type h, size_type w): base(h, w) {}
 
-    
     MatrixArithmetic(size_type h, size_type w, typename base::const_reference val)
     :base(h, w, val)
     {}
