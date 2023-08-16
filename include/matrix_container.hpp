@@ -37,8 +37,6 @@ private:
 
 public:
 //--------------------------------=| Classic ctors start |=---------------------------------------------
-    MatrixContainer() = default;
-
     MatrixContainer(size_type h, size_type w, const_reference val)
     :height_ {h}, width_ {w}, data_ (height_, Row(width_, val))
     {}
