@@ -62,18 +62,6 @@ public:
     {}
 //--------------------------------=| Ctors end |=-------------------------------------------------------
 
-//--------------------------------=| Virtual dtor for inheritance start |=------------------------------
-    virtual ~MatrixArithmetic() {}
-//--------------------------------=| Virtual dtor for inheritance end |=--------------------------------
-
-//--------------------------------=| Types start |=-----------------------------------------------------
-    bool is_empty()  const {return base::height() == 0;}
-    bool is_row()    const {return base::height() == 1;}
-    bool is_column() const {return base::width() == 1;}
-    bool is_scalar() const {return base::height() == 1 && base::width() == 1;}
-    bool is_square() const {return base::height() == base::width();}
-//--------------------------------=| Types end |=-------------------------------------------------------
-
 //--------------------------------=| Algorithm fucntions start |=---------------------------------------
 protected:
     size_type row_with_max_fst(size_type iteration)
@@ -173,7 +161,7 @@ protected:
 public:
     value_type determinant() const requires (is_div_arithmetical == true)
     {
-        if (!is_square())
+        if (!base::is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy {*this};
@@ -183,7 +171,7 @@ public:
 
     value_type determinant() const
     {
-        if (!is_square())
+        if (!base::is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy {*this};
@@ -192,7 +180,7 @@ public:
 
     std::pair<bool, MatrixArithmetic> inverse_pair() const requires (is_div_arithmetical == true)
     {
-        if (!is_square())
+        if (!base::is_square())
             throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
 
         MatrixArithmetic extended_mat (base::height(), 2 * base::height());

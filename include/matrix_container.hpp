@@ -112,6 +112,14 @@ public:
     const Row& operator[](size_type ind) const {return data_[ind];} 
 //--------------------------------=| Acces operators end |=---------------------------------------------
 
+//--------------------------------=| Types start |=-----------------------------------------------------
+    bool is_empty()  const {return height() == 0;}
+    bool is_row()    const {return height() == 1;}
+    bool is_column() const {return width() == 1;}
+    bool is_scalar() const {return height() == 1 && width() == 1;}
+    bool is_square() const {return height() == width();}
+//--------------------------------=| Types end |=-------------------------------------------------------
+
 //--------------------------------=| Swap rows and columns start |=-------------------------------------
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++                                                                         
  *----------------------------------------------------------------------------*
