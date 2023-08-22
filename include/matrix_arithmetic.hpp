@@ -31,21 +31,21 @@ class MatrixArithmetic : public MatrixContainer<T>
 public:
     using base = MatrixContainer<T>; 
 
-    using size_type        = typename base::size_type;
-    using value_type       = typename base::value_type;
-    using reference        = typename base::reference;
-    using const_reference  = typename base::const_reference;
-    using pointer          = typename base::pointer;
-    using const_pointer    = typename base::const_pointer;
+    using typename base::size_type;
+    using typename base::value_type;
+    using typename base::reference;
+    using typename base::const_reference;
+    using typename base::pointer;
+    using typename base::const_pointer;
 
-    using Row = typename base::Row;
+    using typename base::Row;
 
-    using RowIterator      = typename base::RowIterator;
-    using RowConstIterator = typename base::RowConstIterator;
-    using Iterator         = typename base::Iterator;
-    using ConstIterator    = typename base::ConstIterator;
-    using ReverseIterator  = typename base::ReverseIterator;
-    using ConstReverseIterator = typename base::ConstReverseIterator;
+    using typename base::RowIterator;
+    using typename base::RowConstIterator;
+    using typename base::Iterator;
+    using typename base::ConstIterator;
+    using typename base::ReverseIterator;
+    using typename base::ConstReverseIterator;
 
 protected:    
     static constexpr bool is_div_arithmetical = IsDivArithm;
