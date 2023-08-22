@@ -37,6 +37,8 @@ private:
 
 public:
 //--------------------------------=| Classic ctors start |=---------------------------------------------
+    MatrixContainer() = default;
+    
     MatrixContainer(size_type h, size_type w, const_reference val)
     :height_ {h}, width_ {w}, data_ (height_, Row(width_, val))
     {}
@@ -45,8 +47,8 @@ public:
     :height_ {h}, width_ {w}, data_ (height_, Row(width_))
     {}
 
-    template<std::input_iterator it>
-    MatrixContainer(size_type h, size_type w, it begin, it end)
+    template<std::input_iterator InpIt>
+    MatrixContainer(size_type h, size_type w, InpIt begin, InpIt end)
     :height_ {h}, width_ {w}, data_ (height_, Row(width_))
     {   
         for (auto& row: data_)
@@ -57,7 +59,7 @@ public:
                     elem = value_type{};        
     }
 
-    MatrixContainer(value_type val = value_type{})
+    explicit MatrixContainer(const_reference val)
     :height_ {1}, width_ {1}, data_ (1, Row{val})
     {}
 

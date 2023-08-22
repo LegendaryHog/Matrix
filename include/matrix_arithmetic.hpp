@@ -40,16 +40,16 @@ public:
 //--------------------------------=| Ctors start |=-----------------------------------------------------
     MatrixArithmetic(size_type h, size_type w): base(h, w) {}
 
-    MatrixArithmetic(size_type h, size_type w, typename base::const_reference val)
+    MatrixArithmetic(size_type h, size_type w, const_reference val)
     :base(h, w, val)
     {}
 
-    template<std::input_iterator it>
-    MatrixArithmetic(size_type h, size_type w, it begin, it end)
+    template<std::input_iterator InpIt>
+    MatrixArithmetic(size_type h, size_type w, InpIt begin, InpIt end)
     :base(h, w, begin, end)
     {}
 
-    MatrixArithmetic(value_type val = value_type{})
+    MatrixArithmetic(const_reference val)
     :base(val)
     {}
 
@@ -82,12 +82,12 @@ protected:
         value_type div_coef {1};
         value_type sign {1};
         value_type null_obj {};
-        for (std::size_t i = 0; i < side_of_square - 1; i++)
+        for (size_type i = 0; i < side_of_square - 1; i++)
         {
             auto row_to_swap = row_with_max_fst(i);
             if (row_to_swap != i)
             {
-                base::swap_row(i, row_with_max_fst(i));
+                base::swap_row(i, row_to_swap);
                 sign *= value_type{-1};
             }
             if (!cmp(base::to(i, i), null_obj))
@@ -104,7 +104,7 @@ protected:
     }
     
     // method for types with arithmetic division by Gauss algorithm
-    value_type make_upper_triangular_square(size_type side_of_square) requires (is_div_arithmetical == true)
+    value_type make_upper_triangular_square(size_type side_of_square) requires is_div_arithmetical
     {
         if (side_of_square > std::min(base::height(), base::width()))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
@@ -130,7 +130,7 @@ protected:
         return sign;
     }
 
-    void make_eye_square_from_upper_triangular_square(size_type side_of_square) requires (is_div_arithmetical == true)
+    void make_eye_square_from_upper_triangular_square(size_type side_of_square) requires is_div_arithmetical
     {
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
         {
@@ -140,7 +140,7 @@ protected:
         }
         
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
-            for (std::size_t j = 0; j < i; j++)
+            for (size_type j = 0; j < i; j++)
             {
                 auto coef = base::to(j, i);
                 for(size_type k = i; k < base::width(); k++)
@@ -148,7 +148,7 @@ protected:
             }
     }
 
-    value_type determinant_for_upper_triangular() const requires (is_div_arithmetical == true)
+    value_type determinant_for_upper_triangular() const requires is_div_arithmetical
     {
         value_type res {1};
         for (size_type i = 0; i < base::height(); i++)
@@ -159,7 +159,7 @@ protected:
 
 //--------------------------------=| Public methods start |=--------------------------------------------
 public:
-    value_type determinant() const requires (is_div_arithmetical == true)
+    value_type determinant() const requires is_div_arithmetical
     {
         if (!base::is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
@@ -174,11 +174,11 @@ public:
         if (!base::is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
-        MatrixArithmetic cpy {*this};
+        MatrixArithmetic cpy (*this);
         return cpy.make_upper_triangular_square(base::height());
     }
 
-    std::pair<bool, MatrixArithmetic> inverse_pair() const requires (is_div_arithmetical == true)
+    std::pair<bool, MatrixArithmetic> inverse_pair() const requires is_div_arithmetical
     {
         if (!base::is_square())
             throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
@@ -206,7 +206,7 @@ public:
         return {true, res};
     }
 
-    MatrixArithmetic inverse() const requires (is_div_arithmetical == true)
+    MatrixArithmetic inverse() const requires is_div_arithmetical
     {
         auto res_pair = inverse_pair();
         if (!res_pair.first)
@@ -217,7 +217,7 @@ public:
 
     MatrixArithmetic transpos() const
     {
-        MatrixArithmetic res {base::width(), base::height()};
+        MatrixArithmetic res (base::width(), base::height());
         for (size_type i = 0; i < base::height(); i++)
             for (size_type j = 0; j < base::width(); j++)
                 res.to(j, i) = base::to(i, j);
@@ -231,8 +231,8 @@ public:
         if (base::height() != rhs.height() || base::width() != rhs.width())
             return false;
 
-        for (size_t i = 0; i < base::height(); i++)
-            for (size_t j = 0; j < base::width(); j++)
+        for (size_type i = 0; i < base::height(); i++)
+            for (size_type j = 0; j < base::width(); j++)
                 if (!cmp(base::to(i, j), rhs.to(i, j)))
                     return false;                  
         return true;
@@ -245,8 +245,8 @@ public:
         if (base::height() != rhs.height() || base::width() != rhs.width())
             throw std::invalid_argument{"Try to add matrixes with different height() * width()"};
 
-        for (std::size_t i = 0; i < base::height(); i++)
-            for (std::size_t j = 0; j < base::width(); j++)
+        for (size_type i = 0; i < base::height(); i++)
+            for (size_type j = 0; j < base::width(); j++)
                 base::to(i, j) += rhs.to(i, j);
 
         return *this;
@@ -257,8 +257,8 @@ public:
         if (base::height() != rhs.height() || base::width() != rhs.width())
             throw std::invalid_argument{"Try to sub matrixes with different height() * width()"};
 
-        for (std::size_t i = 0; i < base::height(); i++)
-            for (std::size_t j = 0; j < base::width(); j++)
+        for (size_type i = 0; i < base::height(); i++)
+            for (size_type j = 0; j < base::width(); j++)
                 base::to(i, j) -= rhs.to(i, j);
 
         return *this;
@@ -268,14 +268,14 @@ public:
     {
         MatrixArithmetic res (base::height(), base::width());
 
-        for (std::size_t i = 0; i < base::height(); i++)
-            for (std::size_t j = 0; j < base::width(); j++)
+        for (size_type i = 0; i < base::height(); i++)
+            for (size_type j = 0; j < base::width(); j++)
                 res.to(i, j) = -base::to(i, j);
 
         return res;
     }
 
-    MatrixArithmetic& operator*=(const T& rhs)
+    MatrixArithmetic& operator*=(const_reference rhs)
     {
         for (auto& row: *this)
             for (auto& elem: row)
@@ -283,7 +283,7 @@ public:
         return *this;
     }
 
-    MatrixArithmetic& operator/=(const T& rhs)
+    MatrixArithmetic& operator/=(const_reference rhs)
     {
         for (auto& row: *this)
             for (auto& elem: row)
@@ -293,38 +293,43 @@ public:
 //--------------------------------=| Basic arithmetic end |=--------------------------------------------
 
 //--------------------------------=| Specific static ctors start |=-------------------------------------
-    static MatrixArithmetic square(size_type sz, value_type val = value_type{})
+    static MatrixArithmetic square(size_type sz)
+    {
+        return MatrixArithmetic(sz, sz);
+    }
+
+    static MatrixArithmetic square(size_type sz, const_reference val)
     {
         return MatrixArithmetic(sz, sz, val);
     }
 
-    template<std::input_iterator it>
-    static MatrixArithmetic square(size_type sz, it begin, it end)
+    template<std::input_iterator InpIt>
+    static MatrixArithmetic square(size_type sz, InpIT begin, InpIt end)
     {
         return MatrixArithmetic(sz, sz, begin, end);
     }
 
-    template<std::input_iterator it>
-    static MatrixArithmetic diag(size_type sz, it begin, it end)
+    template<std::input_iterator InpIt>
+    static MatrixArithmetic diag(size_type sz, InpIt begin, InpIt end)
     {
-        MatrixArithmetic result {square(sz)};
+        MatrixArithmetic result (square(sz));
         auto itr = begin;
         for (size_type i = 0; i < sz && itr != end; ++itr, i++)
             result.to(i, i) = *itr;
         return result;
     }
 
-    template<std::input_iterator it>
-    static MatrixArithmetic diag(it begin, it end)
+    template<std::input_iterator InpIt>
+    static MatrixArithmetic diag(InpIt begin, InpIt end)
     {
         size_type sz = 0;
-        for (auto itr = begin; itr != end; ++itr, sz++) {;}
+        for (auto itr = begin; itr != end; ++itr, sz++) {}
         return diag(sz, begin, end);
     }
 
-    static MatrixArithmetic diag(size_type sz, value_type val = value_type{})
+    static MatrixArithmetic diag(size_type sz, const_reference val)
     {
-        MatrixArithmetic result {square(sz)};
+        MatrixArithmetic result (square(sz));
         for (size_type i = 0; i < sz; i++)
             result.to(i, i) = val;
         return result;
@@ -335,7 +340,17 @@ public:
         return diag(sz, value_type{1});
     }
 //--------------------------------=| Specific static ctors end |=---------------------------------------
-};
+}; // class MatrixArithmetic
+
+//--------------------------------=| Cast to scalar start |=--------------------------------------------
+template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
+T scalar_cast(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
+{
+    if (!mat.is_scalar())
+        throw std::invalid_argument{"Try to cast MatrixArithmetic in value_type, but matrix isnt scalar"};
+    return mat.to(0, 0);
+}
+//--------------------------------=| Cast to scalar end |=----------------------------------------------
 
 //--------------------------------=| Wrappers arounf methods start |=-----------------------------------
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
@@ -369,8 +384,8 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
 {
     if (lhs.is_scalar())
     {
-        MatrixArithmetic res {rhs};
-        const T& scalar = scalar_cast(lhs);
+        MatrixArithmetic res (rhs);
+        const auto& scalar = scalar_cast(lhs);
         for (auto& row: res)
             for (auto& elem: row)
                 elem *= scalar;
@@ -378,8 +393,8 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
     }
     if (rhs.is_scalar())
     {
-        MatrixArithmetic res {lhs};
-        const T& scalar = scalar_cast(rhs);
+        MatrixArithmetic res (lhs);
+        const auto& scalar = scalar_cast(rhs);
         for (auto& row: res)
             for (auto& elem: row)
                 elem *= scalar;
@@ -390,9 +405,11 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
 
     MatrixArithmetic<T, IsDivArithm, Cmp, Abs> res (lhs.height(), rhs.width());
 
-    for (std::size_t i = 0; i < lhs.height(); i++)
-        for (std::size_t j = 0; j < rhs.width(); j++)
-            for (std::size_t k = 0; k < lhs.width(); k++)
+    using size_type = typename MatrixArithmetic<T, IsDivArithm, Cmp, Abs>::size_type;
+
+    for (size_typet i = 0; i < lhs.height(); i++)
+        for (size_type j = 0; j < rhs.width(); j++)
+            for (size_type k = 0; k < lhs.width(); k++)
                 res[i][j] += lhs[i][k] * rhs[k][j];
 
     return res; 
@@ -407,7 +424,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> power(const MatrixArithmetic<T, IsDiv
         if (pow == 0)
             return MatrixArithmetic<T, IsDivArithm, Cmp, Abs>::eye(mat.height());
 
-        MatrixArithmetic<T, IsDivArithm, Cmp, Abs> res {mat};
+        MatrixArithmetic<T, IsDivArithm, Cmp, Abs> res (mat);
 
         if (pow < 0)
         {
@@ -436,21 +453,21 @@ bool operator!=(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const Mat
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator+(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy (lhs);
     return (lhs_cpy += rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator-(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy (lhs);
     return (lhs_cpy -= rhs);
 }
 
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator*(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy (lhs);
     return (lhs_cpy *= rhs);
 }
 
@@ -463,18 +480,8 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator*(const T& lhs, const MatrixA
 template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
 MatrixArithmetic<T, IsDivArithm, Cmp, Abs> operator/(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& lhs, const T& rhs)
 {
-    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy {lhs};
+    MatrixArithmetic<T, IsDivArithm, Cmp, Abs> lhs_cpy (lhs);
     return (lhs_cpy /= rhs);
 }
 //--------------------------------=| Arrithmetical operators end |=-------------------------------------
-
-//--------------------------------=| Cast to scalar start |=--------------------------------------------
-template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T>, class Abs = detail::DefaultAbs<T>>
-T scalar_cast(const MatrixArithmetic<T, IsDivArithm, Cmp, Abs>& mat)
-{
-    if (!mat.is_scalar())
-        throw std::invalid_argument{"Try to cast MatrixArithmetic in value_type, but matrix isnt scalar"};
-    return mat.to(0, 0);
-}
-//--------------------------------=| Cast to scalar end |=----------------------------------------------
 } // namespace Matrix
