@@ -28,16 +28,34 @@ template<typename T = int, bool IsDivArithm = false, class Cmp = std::equal_to<T
  */
 class MatrixArithmetic : public MatrixContainer<T> 
 {
-    using base       = MatrixContainer<T>; 
-    using size_type  = std::size_t;
-    using value_type = T;
-    
+public:
+    using base = MatrixContainer<T>; 
+
+    using size_type        = typename base::size_type;
+    using value_type       = typename base::value_type;
+    using reference        = typename base::reference;
+    using const_reference  = typename base::const_reference;
+    using pointer          = typename base::pointer;
+    using const_pointer    = typename base::const_pointer;
+
+    using Row = typename base::Row;
+
+    using RowIterator      = typename base::RowIterator;
+    using RowConstIterator = typename base::RowConstIterator;
+    using Iterator         = typename base::Iterator;
+    using ConstIterator    = typename base::ConstIterator;
+    using ReverseIterator  = typename base::ReverseIterator;
+    using ConstReverseIterator = typename base::ConstReverseIterator;
+
+protected:    
     static constexpr bool is_div_arithmetical = IsDivArithm;
     Cmp cmp {};
     Abs abs {};
 
 public:
 //--------------------------------=| Ctors start |=-----------------------------------------------------
+    MatrixArithmetic(): base() {}
+
     MatrixArithmetic(size_type h, size_type w): base(h, w) {}
 
     MatrixArithmetic(size_type h, size_type w, const_reference val)
@@ -304,7 +322,7 @@ public:
     }
 
     template<std::input_iterator InpIt>
-    static MatrixArithmetic square(size_type sz, InpIT begin, InpIt end)
+    static MatrixArithmetic square(size_type sz, InpIt begin, InpIt end)
     {
         return MatrixArithmetic(sz, sz, begin, end);
     }
@@ -407,7 +425,7 @@ MatrixArithmetic<T, IsDivArithm, Cmp, Abs> product(const MatrixArithmetic<T, IsD
 
     using size_type = typename MatrixArithmetic<T, IsDivArithm, Cmp, Abs>::size_type;
 
-    for (size_typet i = 0; i < lhs.height(); i++)
+    for (size_type i = 0; i < lhs.height(); i++)
         for (size_type j = 0; j < rhs.width(); j++)
             for (size_type k = 0; k < lhs.width(); k++)
                 res[i][j] += lhs[i][k] * rhs[k][j];
