@@ -166,10 +166,10 @@ protected:
             }
     }
 
-    value_type determinant_for_upper_triangular() const requires is_div_arithmetical
+    value_type determinant_for_upper_triangular(size_type side_of_square) const requires is_div_arithmetical
     {
         value_type res {1};
-        for (size_type i = 0; i < this->height(); i++)
+        for (size_type i = 0; i < side_of_square; i++)
             res *= this->to(i, i);
         return res;
     }
@@ -182,9 +182,9 @@ public:
         if (!this->is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
-        MatrixArithmetic cpy {*this};
+        MatrixArithmetic cpy (*this);
         value_type sign = cpy.make_upper_triangular_square(this->height());
-        return sign * cpy.determinant_for_upper_triangular();
+        return sign * cpy.determinant_for_upper_triangular(this->height());
     }
 
     value_type determinant() const
@@ -211,7 +211,7 @@ public:
 
         extended_mat.make_upper_triangular_square(extended_mat.height());
 
-        if (extended_mat.determinant_for_upper_triangular() == value_type{})
+        if (extended_mat.determinant_for_upper_triangular(extended_mat.height()) == value_type{})
             return {false, MatrixArithmetic{value_type{0}}};
 
         extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height());
