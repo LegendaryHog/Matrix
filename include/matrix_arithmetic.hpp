@@ -85,8 +85,8 @@ protected:
     size_type row_with_max_fst(size_type iteration)
     {
         size_type res = iteration;
-        for (size_type i = iteration; i < base::height(); i++)
-            if (abs(base::to(i, iteration)) > abs(base::to(res, iteration)))
+        for (size_type i = iteration; i < this->height(); i++)
+            if (abs(this->to(i, iteration)) > abs(this->to(res, iteration)))
                 res = i;
         return res;
     }
@@ -94,7 +94,7 @@ protected:
     // method for types with non aritmetic division by Bareiss algorithm Bareiss 
     value_type make_upper_triangular_square(size_type side_of_square) 
     {
-        if (side_of_square > std::min(base::height(), base::width()))
+        if (side_of_square > std::min(this->height(), this->width()))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
 
         value_type div_coef {1};
@@ -105,26 +105,26 @@ protected:
             auto row_to_swap = row_with_max_fst(i);
             if (row_to_swap != i)
             {
-                base::swap_row(i, row_to_swap);
+                this->swap_row(i, row_to_swap);
                 sign *= value_type{-1};
             }
-            if (!cmp(base::to(i, i), null_obj))
+            if (!cmp(this->to(i, i), null_obj))
             {
                 for (size_type j = i + 1; j < side_of_square; j++)
                     for (size_type k = i + 1; k < side_of_square; k++)
-                        base::to(j, k) = (base::to(j, k) * base::to(i, i) - base::to(j, i) * base::to(i, k)) / div_coef;
-                div_coef = base::to(i, i);
+                        this->to(j, k) = (this->to(j, k) * this->to(i, i) - this->to(j, i) * this->to(i, k)) / div_coef;
+                div_coef = this->to(i, i);
             }
             else
                 sign = null_obj;
         }
-        return base::to(side_of_square - 1, side_of_square - 1) * sign;
+        return this->to(side_of_square - 1, side_of_square - 1) * sign;
     }
     
     // method for types with arithmetic division by Gauss algorithm
     value_type make_upper_triangular_square(size_type side_of_square) requires is_div_arithmetical
     {
-        if (side_of_square > std::min(base::height(), base::width()))
+        if (side_of_square > std::min(this->height(), this->width()))
             throw std::invalid_argument{"try to make upper triangular square that no inside matrix"};
     
         value_type sign {1};
@@ -134,15 +134,15 @@ protected:
             auto row_to_swap = row_with_max_fst(i);
             if (row_to_swap != i)
             {
-                base::swap_row(i, row_with_max_fst(i));
+                this->swap_row(i, row_with_max_fst(i));
                 sign *= value_type{-1};
             }
-            if (!cmp(base::to(i, i), null_obj))
+            if (!cmp(this->to(i, i), null_obj))
                 for (size_type j = i + 1; j < side_of_square; j++)
                 {
-                    value_type coef = base::to(j, i) / base::to(i, i);
-                    for (size_type k = i; k < base::width(); k++)
-                        base::to(j, k) -= coef * base::to(i, k);
+                    value_type coef = this->to(j, i) / this->to(i, i);
+                    for (size_type k = i; k < this->width(); k++)
+                        this->to(j, k) -= coef * this->to(i, k);
                 }
         }
         return sign;
@@ -152,25 +152,25 @@ protected:
     {
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
         {
-            auto coef = base::to(i, i);
-            for (size_type j = i; j < base::width(); j++)
-                base::to(i, j) /= coef;
+            auto coef = this->to(i, i);
+            for (size_type j = i; j < this->width(); j++)
+                this->to(i, j) /= coef;
         }
         
         for (size_type i = side_of_square - 1; static_cast<long long>(i) >= 0; i--)
             for (size_type j = 0; j < i; j++)
             {
-                auto coef = base::to(j, i);
-                for(size_type k = i; k < base::width(); k++)
-                    base::to(j, k) -= base::to(i, k) * coef;
+                auto coef = this->to(j, i);
+                for(size_type k = i; k < this->width(); k++)
+                    this->to(j, k) -= this->to(i, k) * coef;
             }
     }
 
     value_type determinant_for_upper_triangular() const requires is_div_arithmetical
     {
         value_type res {1};
-        for (size_type i = 0; i < base::height(); i++)
-            res *= base::to(i, i);
+        for (size_type i = 0; i < this->height(); i++)
+            res *= this->to(i, i);
         return res;
     }
 //--------------------------------=| Algorithm fucntions end |=-----------------------------------------
@@ -179,35 +179,35 @@ protected:
 public:
     value_type determinant() const requires is_div_arithmetical
     {
-        if (!base::is_square())
+        if (!this->is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy {*this};
-        value_type sign = cpy.make_upper_triangular_square(base::height());
+        value_type sign = cpy.make_upper_triangular_square(this->height());
         return sign * cpy.determinant_for_upper_triangular();
     }
 
     value_type determinant() const
     {
-        if (!base::is_square())
+        if (!this->is_square())
             throw std::invalid_argument{"try to get determinant() of no square matrix"};
 
         MatrixArithmetic cpy (*this);
-        return cpy.make_upper_triangular_square(base::height());
+        return cpy.make_upper_triangular_square(this->height());
     }
 
     std::pair<bool, MatrixArithmetic> inverse_pair() const requires is_div_arithmetical
     {
-        if (!base::is_square())
+        if (!this->is_square())
             throw std::invalid_argument{"try to get inverse matrix of no square matrix"};
 
-        MatrixArithmetic extended_mat (base::height(), 2 * base::height());
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::height(); j++)
-                extended_mat.to(i, j) = base::to(i, j);
+        MatrixArithmetic extended_mat (this->height(), 2 * this->height());
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->height(); j++)
+                extended_mat.to(i, j) = this->to(i, j);
         
-        for (size_type i = 0; i < base::height(); i++)
-            extended_mat.to(i, i + base::height()) = value_type{1};
+        for (size_type i = 0; i < this->height(); i++)
+            extended_mat.to(i, i + this->height()) = value_type{1};
 
         extended_mat.make_upper_triangular_square(extended_mat.height());
 
@@ -216,10 +216,10 @@ public:
 
         extended_mat.make_eye_square_from_upper_triangular_square(extended_mat.height());
         
-        MatrixArithmetic res (base::height(), base::height());
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::height(); j++)
-                res.to(i, j) = extended_mat.to(i, j + base::height());
+        MatrixArithmetic res (this->height(), this->height());
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->height(); j++)
+                res.to(i, j) = extended_mat.to(i, j + this->height());
         
         return {true, res};
     }
@@ -235,10 +235,10 @@ public:
 
     MatrixArithmetic transpos() const
     {
-        MatrixArithmetic res (base::width(), base::height());
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::width(); j++)
-                res.to(j, i) = base::to(i, j);
+        MatrixArithmetic res (this->width(), this->height());
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->width(); j++)
+                res.to(j, i) = this->to(i, j);
         return res;
     }
 //--------------------------------=| Public methods end |=----------------------------------------------
@@ -246,12 +246,12 @@ public:
 //--------------------------------=| Compare start |=---------------------------------------------------
     bool equal_to(const MatrixArithmetic& rhs) const
     {
-        if (base::height() != rhs.height() || base::width() != rhs.width())
+        if (this->height() != rhs.height() || this->width() != rhs.width())
             return false;
 
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::width(); j++)
-                if (!cmp(base::to(i, j), rhs.to(i, j)))
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->width(); j++)
+                if (!cmp(this->to(i, j), rhs.to(i, j)))
                     return false;                  
         return true;
     }
@@ -260,35 +260,35 @@ public:
 //--------------------------------=| Basic arithmetic start |=------------------------------------------
     MatrixArithmetic& operator+=(const MatrixArithmetic& rhs)
     {
-        if (base::height() != rhs.height() || base::width() != rhs.width())
+        if (this->height() != rhs.height() || this->width() != rhs.width())
             throw std::invalid_argument{"Try to add matrixes with different height() * width()"};
 
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::width(); j++)
-                base::to(i, j) += rhs.to(i, j);
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->width(); j++)
+                this->to(i, j) += rhs.to(i, j);
 
         return *this;
     }
 
     MatrixArithmetic& operator-=(const MatrixArithmetic& rhs)
     {
-        if (base::height() != rhs.height() || base::width() != rhs.width())
+        if (this->height() != rhs.height() || this->width() != rhs.width())
             throw std::invalid_argument{"Try to sub matrixes with different height() * width()"};
 
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::width(); j++)
-                base::to(i, j) -= rhs.to(i, j);
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->width(); j++)
+                this->to(i, j) -= rhs.to(i, j);
 
         return *this;
     }
 
     MatrixArithmetic operator-() const
     {
-        MatrixArithmetic res (base::height(), base::width());
+        MatrixArithmetic res (this->height(), this->width());
 
-        for (size_type i = 0; i < base::height(); i++)
-            for (size_type j = 0; j < base::width(); j++)
-                res.to(i, j) = -base::to(i, j);
+        for (size_type i = 0; i < this->height(); i++)
+            for (size_type j = 0; j < this->width(); j++)
+                res.to(i, j) = -this->to(i, j);
 
         return res;
     }
