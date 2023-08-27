@@ -1,2 +1,2 @@
 
-add_executable(task_det matrix.cpp)
+add_executable(determinant matrix.cpp)

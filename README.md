@@ -7,8 +7,10 @@ Derived class MatrixArithmetic: he has resposibiility to make arithmetical opera
 
 ```
 cmake -B build/
-cmake --build unit_tests              # unit tests
-cmake --build task                    # task
+cmake --build build                        # build all targets
+cmake --build build/ --target vector_test  # build vector unit tests
+cmake --build build/ --target matrix_test  # build matrix unit tests
+cmake --build build/ --target determinant  # build determinant
 ```
 
 # How to test?
