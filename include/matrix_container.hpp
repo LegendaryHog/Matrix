@@ -7,7 +7,8 @@
 #include <type_traits>
 #include <cstddef>
 #include <compare>
-#include "Vector/include/vector.hpp"
+
+#include "vector.hpp"
 
 namespace Matrix
 {
