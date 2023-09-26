@@ -391,8 +391,8 @@ TEST(Methods, product)
 
 TEST(Iterators, Iterator_and_ConstIterator)
 {
-    static_assert(std::random_access_iterator<MatrixArithmetic<>::Iterator>);
-    static_assert(std::random_access_iterator<MatrixArithmetic<>::ConstIterator>);
+    static_assert(std::random_access_iterator<MatrixArithmetic<>::iterator>);
+    static_assert(std::random_access_iterator<MatrixArithmetic<>::const_iterator>);
 }
 
 

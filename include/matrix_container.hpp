@@ -25,12 +25,12 @@ public:
 
     using Row = typename Container::Vector<value_type>;
 
-    using RowIterator      = typename Row::Iterator;
-    using RowConstIterator = typename Row::ConstIterator;
-    using Iterator         = typename Container::Vector<Row>::Iterator;
-    using ConstIterator    = typename Container::Vector<Row>::ConstIterator;
-    using ReverseIterator  = typename Container::Vector<Row>::ReverseIterator;
-    using ConstReverseIterator = typename Container::Vector<Row>::ConstReverseIterator;
+    using row_iterator       = typename Row::iterator;
+    using row_const_iterator = typename Row::const_iterator;
+    using iterator       = typename Container::Vector<Row>::iterator;
+    using const_iterator = typename Container::Vector<Row>::const_iterator;
+    using reverse_iterator       = typename Container::Vector<Row>::reverse_iterator;
+    using const_reverse_iterator = typename Container::Vector<Row>::const_reverse_iterator;
 
 private:
     size_type height_ = 0, width_ = 0;
@@ -151,23 +151,23 @@ public:
 
 //--------------------------------=| Iterators start |=-------------------------------------------------
 
-    Iterator begin() {return data_.begin();}
-    Iterator end()   {return data_.end();}
+    iterator begin() {return data_.begin();}
+    iterator end()   {return data_.end();}
 
-    ConstIterator begin() const {return data_.cbegin();}
-    ConstIterator end()   const {return data_.cend();}
+    const_iterator begin() const {return data_.cbegin();}
+    const_iterator end()   const {return data_.cend();}
 
-    ConstIterator cbegin() const {return data_.cbegin();}
-    ConstIterator cend()   const {return data_.cend();}
+    const_iterator cbegin() const {return data_.cbegin();}
+    const_iterator cend()   const {return data_.cend();}
 
-    ReverseIterator rbegin() {return data_.rbegin();}
-    ReverseIterator rend()   {return data_.rend();}
+    reverse_iterator rbegin() {return data_.rbegin();}
+    reverse_iterator rend()   {return data_.rend();}
 
-    ConstReverseIterator rbegin() const {return data_.crbegin();}
-    ConstReverseIterator rend()   const {return data_.crend();}
+    const_reverse_iterator rbegin() const {return data_.crbegin();}
+    const_reverse_iterator rend()   const {return data_.crend();}
 
-    ConstReverseIterator crbegin() const {return data_.crbegin();}
-    ConstReverseIterator crend()   const {return data_.crend();}
+    const_reverse_iterator crbegin() const {return data_.crbegin();}
+    const_reverse_iterator crend()   const {return data_.crend();}
 //--------------------------------=| Iterators end |=---------------------------------------------------
 };
 

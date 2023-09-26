@@ -40,12 +40,12 @@ public:
 
     using typename base::Row;
 
-    using typename base::RowIterator;
-    using typename base::RowConstIterator;
-    using typename base::Iterator;
-    using typename base::ConstIterator;
-    using typename base::ReverseIterator;
-    using typename base::ConstReverseIterator;
+    using typename base::row_iterator;
+    using typename base::row_const_iterator;
+    using typename base::iterator;
+    using typename base::const_iterator;
+    using typename base::reverse_iterator;
+    using typename base::const_reverse_iterator;
 
 protected:    
     static constexpr bool is_div_arithmetical = IsDivArithm;
