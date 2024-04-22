@@ -23,7 +23,12 @@ if(NOT Vector_FOUND)
     )
 endif()
 
-find_package(Vector REQUIRED)
+find_package(Vector)
+if (${Vector_FOUND})
+    message("-- Found Vector: True")
+else()
+    message(FATAL_ERROR "-- Found Vector: False")
+endif()
 
 set(CMAKE_CXX_STANDARD          20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
