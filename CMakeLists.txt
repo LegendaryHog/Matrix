@@ -30,6 +30,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS        OFF)
 
 add_library(${PROJECT_NAME} INTERFACE)
+target_link_libraries(${PROJECT_NAME} INTERFACE Vector)
 target_include_directories(${PROJECT_NAME} INTERFACE include/)
 
 add_subdirectory(unit_tests)
