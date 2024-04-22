@@ -25,9 +25,9 @@ endif()
 
 find_package(Vector)
 if (${Vector_FOUND})
-    message("-- Found Vector: True")
+    message(STATUS "Found Vector - done")
 else()
-    message(FATAL_ERROR "-- Found Vector: False")
+    message(FATAL_ERROR "Didn't find Vector")
 endif()
 
 set(CMAKE_CXX_STANDARD          20)
